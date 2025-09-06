@@ -1,13 +1,24 @@
 // Smooth scrolling untuk link navigasi
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
+        // Jangan terapkan pada link footer yang sudah memiliki handler khusus
+        if (this.classList.contains('footer-nav-link')) return;
+        
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+            // Hitung posisi scroll dengan memperhitungkan tinggi header
+            const headerOffset = 80;
+            const elementPosition = target.offsetTop;
+            const offsetPosition = elementPosition - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
             });
+            
+            // Tutup menu mobile jika terbuka
+            closeMobileMenu();
         }
     });
 });
@@ -63,6 +74,102 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Fungsi untuk menangani navigasi dan highlight menu
+function initNavigation() {
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const footerLinks = document.querySelectorAll('.footer-nav-link');
+    
+    // Fungsi untuk mengupdate menu aktif
+    function updateActiveNav() {
+        let currentSection = '';
+        const scrollY = window.pageYOffset;
+        const headerHeight = document.querySelector('.main-header').offsetHeight;
+        
+        sections.forEach(section => {
+            const sectionHeight = section.offsetHeight;
+            const sectionTop = section.offsetTop - headerHeight - 50;
+            const sectionId = section.getAttribute('id');
+            
+            if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+                currentSection = sectionId;
+            }
+        });
+        
+        // Hapus kelas aktif dari semua link
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${currentSection}`) {
+                link.classList.add('active');
+            }
+        });
+    }
+    
+    // Event listener untuk scroll
+    window.addEventListener('scroll', updateActiveNav);
+    
+    // Event listener untuk link footer
+    footerLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetSection = this.getAttribute('data-section');
+            const targetElement = document.getElementById(targetSection);
+            
+            if (targetElement) {
+                // Hitung posisi scroll dengan memperhitungkan tinggi header
+                const headerOffset = 80;
+                const elementPosition = targetElement.offsetTop;
+                const offsetPosition = elementPosition - headerOffset;
+
+                // Scroll ke section target
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth"
+                });
+                
+                // Update menu aktif setelah scroll selesai
+                setTimeout(() => {
+                    updateActiveNav();
+                }, 1000);
+                
+                // Tutup menu mobile jika terbuka
+                closeMobileMenu();
+            }
+        });
+    });
+    
+    // Inisialisasi saat halaman dimuat
+    updateActiveNav();
+}
+
+// Fungsi untuk toggle mobile menu
+function initMobileMenu() {
+    const hamburger = document.querySelector('.hamburger-menu');
+    const nav = document.querySelector('.main-nav');
+    
+    if (hamburger && nav) {
+        hamburger.addEventListener('click', function() {
+            this.classList.toggle('active');
+            nav.classList.toggle('active');
+            
+            // Toggle body scroll ketika menu dibuka/ditutup
+            document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : '';
+        });
+    }
+}
+
+// Fungsi untuk menutup mobile menu
+function closeMobileMenu() {
+    const hamburger = document.querySelector('.hamburger-menu');
+    const nav = document.querySelector('.main-nav');
+    
+    if (hamburger && nav) {
+        hamburger.classList.remove('active');
+        nav.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
 
 // --- Kode Slider Hero Section yang Telah Diperbaiki ---
 (function() {
@@ -241,3 +348,27 @@ document.head.appendChild(style);
     showSlide(0);
     startSlider();
 })();
+
+// Panggil fungsi saat DOM siap
+document.addEventListener('DOMContentLoaded', function() {
+    // Inisialisasi navigasi
+    initNavigation();
+    
+    // Inisialisasi mobile menu
+    initMobileMenu();
+    
+    // Pastikan halaman di-scroll ke atas saat dimuat
+    window.scrollTo(0, 0);
+    
+    // Tutup menu mobile saat klik di luar menu
+    document.addEventListener('click', function(e) {
+        const hamburger = document.querySelector('.hamburger-menu');
+        const nav = document.querySelector('.main-nav');
+        
+        if (nav && nav.classList.contains('active') && 
+            !e.target.closest('.main-nav') && 
+            !e.target.closest('.hamburger-menu')) {
+            closeMobileMenu();
+        }
+    });
+});

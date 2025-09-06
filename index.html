@@ -3,119 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="assets/images/logo.png" type="image/x-icon" />
     <title>Smart GreenHeat - Inovasi Mesin Pengering Limbah Peternakan Berbasis IoT</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/landing.css">
-    <style>
-        /* Penyesuaian untuk Produk Section */
-        #produk .section-title {
-            text-align: center;
-        }
-        .products-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-        .product-card {
-            background: #fff;
-            border-radius: var(--border-radius, 0.5rem);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-            overflow: hidden;
-            width: 200px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 1rem 0.5rem;
-        }
-        .product-card .product-image img {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: var(--border-radius, 0.5rem);
-        }
-        .product-description {
-            text-align: center;
-            font-size: 1.15rem;
-            font-weight: 500;
-            margin-bottom: 2rem;
-        }
-        .contact-button-container {
-            text-align: center;
-            margin-top: 2rem;
-        }
-
-        /* Penyesuaian untuk Contact Section Baru */
-        .contact-section {
-            background: #f6f9f7;
-            padding: 60px 0;
-        }
-        .contact-content {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-            align-items: stretch;
-            justify-content: space-between;
-        }
-        .contact-info {
-            flex: 1 1 260px;
-            background: #fff;
-            border-radius: var(--border-radius, 0.5rem);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-            padding: 2rem 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            min-width: 250px;
-            max-width: 350px;
-            justify-content: center;
-        }
-        .contact-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-        .contact-item i {
-            font-size: 1.5rem;
-            color: #2ecc71;
-            margin-top: 0.2rem;
-        }
-        .contact-item h4 {
-            margin: 0 0 0.2rem 0;
-            font-size: 1.1rem;
-            color: #222;
-        }
-        .contact-item p {
-            margin: 0;
-            color: #555;
-            font-size: 1rem;
-        }
-        .contact-map {
-            flex: 2 1 400px;
-            min-width: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .contact-map iframe {
-            width: 100%;
-            height: 300px;
-            border: none;
-            border-radius: var(--border-radius, 0.5rem);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        @media (max-width: 900px) {
-            .contact-content {
-                flex-direction: column;
-                gap: 2rem;
-            }
-            .contact-map, .contact-info {
-                max-width: 100%;
-                min-width: 0;
-            }
-        }
-    </style>
 </head>
 <body>
     <!-- Header -->
@@ -125,12 +16,20 @@
                 <img src="assets/images/logo.png" alt="Smart GreenHeat Logo" class="logo">
                 <h1>Smart GreenHeat</h1>
             </div>
+            
+            <!-- Hamburger Menu -->
+            <button class="hamburger-menu" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
             <nav class="main-nav">
                 <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#about">Tentang</a></li>
-                    <li><a href="#produk">Produk</a></li>
-                    <li><a href="#contact">Kontak</a></li>
+                    <li><a href="#home" class="nav-link active">Home</a></li>
+                    <li><a href="#about" class="nav-link">Tentang</a></li>
+                    <li><a href="#produk" class="nav-link">Produk</a></li>
+                    <li><a href="#contact" class="nav-link">Kontak</a></li>
                 </ul>
             </nav>
             <div class="auth-buttons">
@@ -141,8 +40,8 @@
         </div>
     </header>
 
-    <!-- Hero Section (Home) -->
-    <section id="home" class="hero-section">
+    <!-- ... (Bagian Hero, About, Produk) ... -->
+     <section id="home" class="hero-section full-screen-section">
         <div class="container">
             <div class="hero-content">
                 <h1 class="hero-title">Pupuk Kompos Berkualitas</h1>
@@ -186,7 +85,7 @@
     </section>
 
     <!-- About Section (Tentang) DENGAN SLIDER -->
-    <section id="about" class="about-section">
+    <section id="about" class="about-section full-screen-section">
         <div class="container">
             <h2 class="section-title">Tentang Kami</h2>
             <div class="about-slider-container">
@@ -260,7 +159,7 @@
     </section>
 
     <!-- Produk Section -->
-    <section id="produk" class="features-section">
+    <section id="produk" class="features-section full-screen-section">
         <div class="container">
             <h2 class="section-title">Produk Unggulan Kami</h2>
             
@@ -299,15 +198,15 @@
             
             <!-- Hubungi Kami Button -->
             <div class="contact-button-container">
-                <a href="https://wa.me/6285966943060" class="btn-whatsapp" target="_blank" rel="noopener">
+                <a href="https://wa.me/6281375908444" class="btn-whatsapp" target="_blank" rel="noopener">
                     <span class="wa-icon"><i class="fab fa-whatsapp"></i></span> Hubungi Kami
                 </a>
             </div>
         </div>
     </section>
-
+     
     <!-- Contact Section (Kontak) -->
-    <section id="contact" class="contact-section">
+    <section id="contact" class="contact-section full-screen-section">
         <div class="container">
             <h2 class="section-title">Hubungi Kami</h2>
             <div class="contact-content">
@@ -317,23 +216,24 @@
                         <i class="fas fa-map-marker-alt"></i>
                         <div>
                             <h4>Alamat</h4>
-                            <p>Jl. Teknologi No. 123, Kota Cerdas</p>
+                            <p>Desa SukaMaju, Kec. Siolangit, Kab. Deli Serdang</p>
                         </div>
                     </div>
                     <div class="contact-item">
                         <i class="fas fa-phone"></i>
                         <div>
                             <h4>Telepon</h4>
-                            <p>+62 123 4567 890</p>
+                            <p>+62 813-7590-8444</p>
                         </div>
                     </div>
                 </div>
+                
                 <!-- Kanan: Google Maps -->
                 <div class="contact-map">
                     <iframe 
-                        src="https://www.google.com/maps?q=-6.200000,106.816666&hl=id&z=15&output=embed"
+                        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d200.00760438086706!2d98.59261543196435!3d3.276661169671323!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sid!2sid!4v1757201513072!5m2!1sid!2sid"
                         width="100%" 
-                        height="300" 
+                        height="100%" 
                         style="border: none; border-radius: var(--border-radius, 0.5rem); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);"
                         allowfullscreen=""
                         loading="lazy"
@@ -355,20 +255,11 @@
                 <div class="footer-links">
                     <h4>Tautan</h4>
                     <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#about">Tentang</a></li>
-                        <li><a href="#produk">Produk</a></li>
-                        <li><a href="#contact">Kontak</a></li>
+                        <li><a href="#home" class="footer-nav-link" data-section="home">Home</a> </li>
+                        <li><a href="#about" class="footer-nav-link" data-section="about">Tentang</a></li>
+                        <li><a href="#produk" class="footer-nav-link" data-section="produk">Produk</a></li>
+                        <li><a href="#contact" class="footer-nav-link" data-section="contact">Kontak</a></li>
                     </ul>
-                </div>
-                <div class="footer-social">
-                    <h4>Sosial Media</h4>
-                    <div class="social-icons">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
                 </div>
             </div>
             <div class="footer-bottom">

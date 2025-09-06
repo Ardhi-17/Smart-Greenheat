@@ -2,7 +2,7 @@
 =============================================
 FILE: landing.css
 DESKRIPSI: Stylesheet utama untuk halaman landing page Smart GreenHeat
-VERSI: 1.1 (fix GitHub Pages paths + layout flex)
+VERSI: 1.2 (Hamburger Menu + Responsive Improvements)
 =============================================
 */
 
@@ -51,6 +51,7 @@ body {
   background: var(--white);
   color: var(--text-primary);
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 img { display: block; max-width: 100%; height: auto; }
@@ -77,11 +78,13 @@ HEADER & NAV
   justify-content: space-between;
   gap: var(--spacer-lg);
   padding: var(--spacer) 0;
+  position: relative;
 }
 
 .logo-container {
   display: flex; align-items: center; gap: 0.5rem;
   height: 50px; overflow: hidden; flex: 0 0 auto;
+  z-index: 1001;
 }
 
 .logo { height: 100%; width: auto; max-height: 100%; }
@@ -90,17 +93,55 @@ HEADER & NAV
   font-size: 1.5rem; font-weight: 700; color: var(--primary);
 }
 
+/* Hamburger Menu */
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 25px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+}
+
+.hamburger-menu span {
+  width: 100%;
+  height: 3px;
+  background: var(--text-primary);
+  border-radius: 5px;
+  transition: all 0.3s linear;
+  position: relative;
+  transform-origin: center;
+}
+
+/* Hamburger animation when active */
+.hamburger-menu.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-menu.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-menu.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
 .main-nav { flex: 1 1 auto; }
 .main-nav ul {
   display: flex; list-style: none;
   gap: var(--spacer-lg);
-  justify-content: center;  /* pusatkan menu tanpa magic number */
+  justify-content: center;
 }
 
 .main-nav a {
   text-decoration: none; color: var(--text-primary);
   font-weight: 500; transition: var(--transition);
   position: relative;
+  font-size: 1rem;
 }
 .main-nav a:hover { color: var(--primary); }
 .main-nav a::after {
@@ -118,18 +159,20 @@ HEADER & NAV
 .btn-whatsapp,
 .btn-primary,
 .btn-secondary {
-  padding: 0.5rem 1.2rem;
+  padding: 0.6rem 1.4rem;
   border-radius: var(--radius);
   text-decoration: none;
   font-weight: 600;
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
   transition: var(--transition);
   border: none; cursor: pointer;
+  font-size: 0.95rem;
+  min-height: 44px; /* Minimum touch target size for accessibility */
 }
 
 .btn-login {
   background: var(--primary); color: var(--white);
-  min-width: 90px; height: 2.2rem;
+  min-width: 90px;
   box-shadow: 0 2px 8px rgba(255,154,0,0.10);
 }
 .btn-login:hover, .btn-login:focus {
@@ -141,24 +184,39 @@ HEADER & NAV
 
 .btn-whatsapp {
   background: #25D366; color: var(--white); font-weight: 500;
+  min-height: 44px;
 }
 .btn-whatsapp:hover {
   background: #1ebe5d; transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(37,211,102,0.15);
 }
 
-.btn-primary { background: var(--white); color: var(--primary); }
+.btn-primary { 
+  background: var(--white); color: var(--primary); 
+  min-height: 44px;
+}
 .btn-primary:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 .btn-secondary {
   background: transparent; color: var(--white); border: 2px solid var(--white);
+  min-height: 44px;
 }
 .btn-secondary:hover {
   background: var(--white); color: var(--primary);
   transform: translateY(-3px);
   box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+/* Style untuk nav link aktif */
+.main-nav .nav-link.active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.main-nav .nav-link.active::after {
+    width: 100%;
 }
 
 /* ---------------------------------------------
@@ -211,6 +269,7 @@ SLIDER (HOME)
   cursor: pointer; font-size: 1rem; border: none;
   transition: all 0.3s ease; z-index: 10; backdrop-filter: blur(5px);
   display: flex; align-items: center; justify-content: center;
+  min-height: 44px;
 }
 .slider-prev:hover, .slider-next:hover {
   background: rgba(255,255,255,0.5); transform: translateY(-50%) scale(1.1);
@@ -262,6 +321,7 @@ ABOUT SLIDER (Tentang Kami)
   cursor: pointer; font-size: 1.5rem; border: none;
   transition: all 0.3s ease; z-index: 10; backdrop-filter: blur(5px);
   display: flex; align-items: center; justify-content: center;
+  min-height: 44px;
 }
 .slider-prev-about:hover, .slider-next-about:hover {
   background: rgba(255,255,255,0.6); transform: translateY(-50%) scale(1.1);
@@ -283,7 +343,7 @@ ABOUT SLIDER (Tentang Kami)
 SEKSI ABOUT (statis)
 --------------------------------------------- */
 .about-section { padding: var(--spacer-xl) 0; }
-.about-section .section-title { text-align: center; margin-bottom: var(--spacer-xl); }
+.about-section .section-title { text-align: center; margin-bottom: var(--spacer-xl);}
 .about-section .section-title::after {
   left: 50%; transform: translateX(-50%);
 }
@@ -338,6 +398,7 @@ KONTAK
 }
 .contact-content {
   display: flex; gap: var(--spacer-xl); flex-wrap: wrap;
+    padding: 20px;
 }
 .contact-info { flex: 1; min-width: 300px; }
 .contact-item {
@@ -396,69 +457,361 @@ FOOTER
 .footer-bottom p { margin: 0; color: var(--gray-400); }
 
 /* ---------------------------------------------
+STYLE UNTUK FULL-SCREEN SECTIONS
+--------------------------------------------- */
+.full-screen-section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 0 40px;
+}
+
+/* Penyesuaian untuk Hero Section */
+.hero-section {
+    margin-top: 0;
+    padding: 0;
+}
+
+.hero-section .container {
+    min-height: 100vh;
+    padding-top: 80px;
+    padding-bottom: 40px;
+}
+
+/* Penyesuaian untuk About Section */
+.about-section .container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.about-slider-container {
+    height: 80vh;
+    max-height: 600px;
+}
+
+/* Penyesuaian untuk Features/Produk Section */
+.features-section {
+    background: var(--secondary);
+    margin-top: 0;
+}
+
+.features-section .container {
+    min-height: 20vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Penyesuaian untuk Contact Section */
+.contact-section {
+    background: var(--secondary);
+    margin-top: 0;
+}
+
+.contact-section .container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Penyesuaian untuk konten di dalam section */
+.hero-content, .about-content, .products-grid, .contact-content {
+    margin: auto 0;
+}
+
+/* Penyesuaian untuk Produk Section */
+#produk .section-title {
+    text-align: center;
+}
+.products-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+.product-card {
+    background: #fff;
+    border-radius: var(--border-radius, 0.5rem);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    overflow: hidden;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0.5rem;
+}
+.product-card .product-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--border-radius, 0.5rem);
+}
+.product-description {
+    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+}
+.contact-button-container {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+/* Penyesuaian untuk Contact Section Baru */
+.contact-section {
+    background: #f6f9f7;
+    padding: 60px 0;
+}
+.contact-content {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-direction: row; /* horizontal */
+}
+.contact-info {
+    flex: 1 300px;
+    background: #fff;
+    border-radius: var(--border-radius, 0.5rem);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 250px;
+    max-width: 350px;
+    justify-content: center;
+}
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+.contact-item i {
+    font-size: 1.5rem;
+    color: #2ecc71;
+    margin-top: 0.2rem;
+}
+.contact-item h4 {
+    margin: 0 0 0.2rem 0;
+    font-size: 1.1rem;
+    color: #222;
+}
+.contact-item p {
+    margin: 0;
+    color: #555;
+    font-size: 1rem;
+}
+.contact-map {
+    flex: 2 400px;
+    min-width: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.contact-map iframe {
+    width: 100%;
+    height: 300px;
+    border: none;
+    border-radius: var(--border-radius, 0.5rem);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* ---------------------------------------------
 RESPONSIVE
 --------------------------------------------- */
 
 /* Tablet (≤ 992px) */
 @media (max-width: 992px) {
-  .hero-section .container { flex-direction: column; text-align: center; }
-  .hero-buttons { justify-content: center; }
-  .about-content { flex-direction: column; padding: var(--spacer); }
-  .about-text, .about-image { width: 100%; }
-  .footer-content { flex-direction: column; }
+    .hero-section .container { flex-direction: column; text-align: center; }
+    .hero-buttons { justify-content: center; }
+    .about-content { flex-direction: column; padding: var(--spacer); }
+    .about-text, .about-image { width: 100%; }
+    .footer-content { flex-direction: column; }
 
-  .slider-container { height: 300px; }
-  .about-slider-container { height: 400px; }
+    .slider-container { height: 300px; }
+    .about-slider-container { height: 400px; }
 
-  .products-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .products-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    
+    /* Perbaikan ukuran button untuk tablet */
+    .btn-login, .btn-whatsapp, .btn-primary {
+        padding: 0.7rem 1.3rem;
+        font-size: 0.9rem;
+    }
 }
 
 /* Mobile Large (≤ 768px) */
 @media (max-width: 768px) {
-  .main-header .container { flex-direction: column; gap: var(--spacer); }
-  .main-nav ul { flex-wrap: wrap; justify-content: center; }
+    .main-header .container { 
+        flex-wrap: wrap; 
+        padding: 0.8rem;
+    }
+    
+    /* Hamburger menu */
+    .hamburger-menu {
+        display: flex;
+        order: 3;
+    }
+    
+    .main-nav {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background: var(--white);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        height: 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .main-nav.active {
+        height: auto;
+        padding: 1rem 0;
+    }
+    
+    .main-nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 0 1rem;
+    }
+    
+    .auth-buttons {
+        margin-right: 0;
+        order: 2;
+    }
+    
+    .logo-container {
+        order: 1;
+        flex: 1;
+    }
+    
+    .hero-title { font-size: 2rem; }
 
-  .auth-buttons { margin-right: 0; justify-content: center; width: 100%; }
-  .hero-title { font-size: 2rem; }
+    .stats { flex-direction: column; gap: var(--spacer); }
+    
+    .slider-container { height: 250px; }
+    .about-slider-container { height: 350px; }
+    .slider-prev, .slider-next { width: 35px; height: 35px; font-size: 0.9rem; }
+    .slider-dots { bottom: 10px; }
+    .dot { width: 8px; height: 8px; }
 
-  .stats { flex-direction: column; gap: var(--spacer); }
-  .btn-login { width: 100%; min-width: 0; height: 2.2rem; }
-
-  .slider-container { height: 250px; }
-  .about-slider-container { height: 350px; }
-  .slider-prev, .slider-next { width: 35px; height: 35px; font-size: 0.9rem; }
-  .slider-dots { bottom: 10px; }
-  .dot { width: 8px; height: 8px; }
-
-  .products-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    .products-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    
+    /* Perbaikan ukuran button untuk mobile */
+    .btn-login, .btn-whatsapp, .btn-primary {
+        padding: 0.8rem 1.2rem;
+        font-size: 0.85rem;
+        min-height: 42px;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn-primary, .btn-whatsapp {
+        width: 100%;
+        max-width: 280px;
+    }
 }
 
 /* Mobile Small (≤ 576px) */
 @media (max-width: 576px) {
-  .hero-buttons { flex-direction: column; align-items: center; }
-  .btn-primary, .btn-secondary, .btn-whatsapp, .btn-login {
-    width: 100%; min-width: 0; height: 2.2rem;
-  }
+    .hero-buttons { flex-direction: column; align-items: center; }
+    .btn-primary, .btn-secondary, .btn-whatsapp, .btn-login {
+        width: 100%; min-width: 0;
+    }
 
-  .slider-container { height: 200px; }
-  .about-slider-container { height: 300px; }
+    .slider-container { height: 200px; }
+    .about-slider-container { height: 300px; }
 
-  .hero-title { font-size: 1.75rem; }
-  .hero-subtitle { font-size: 1rem; }
-  .slider-dots { bottom: 8px; }
-  .dot { width: 7px; height: 7px; }
+    .hero-title { font-size: 1.75rem; }
+    .hero-subtitle { font-size: 1rem; }
+    .slider-dots { bottom: 8px; }
+    .dot { width: 7px; height: 7px; }
 
-  .about-text h3 { font-size: 1.5rem; }
-  .stats { flex-direction: column; }
-  .stat-item h4 { font-size: 1.5rem; }
+    .about-text h3 { font-size: 1.5rem; }
+    .stats { flex-direction: column; }
+    .stat-item h4 { font-size: 1.5rem; }
 
-  .products-grid { grid-template-columns: 1fr; }
-  .product-image { height: 150px; }
+    .products-grid { grid-template-columns: 1fr; }
+    .product-image { height: 150px; }
+    
+    /* Perbaikan ukuran button untuk mobile kecil */
+    .btn-login, .btn-whatsapp, .btn-primary {
+        padding: 0.7rem 1rem;
+        font-size: 0.8rem;
+        min-height: 40px;
+    }
+    
+    .main-header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .logo-container {
+        height: 40px;
+    }
 }
 
-/* ---------------------------------------------
-PETUNJUK PATH GAMBAR DI CSS:
-- Jika memakai background-image di CSS untuk slider/hero:
-  url("../assets/images/sliders/nama-file.jpg")
-  (ingat: file CSS berada di /css, jadi pakai ../ untuk naik ke root repo)
---------------------------------------------- */
+/* Very Small Devices (≤ 400px) */
+@media (max-width: 400px) {
+    .container {
+        padding: 0 0.8rem;
+    }
+    
+    .hero-title {
+        font-size: 1.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+    }
+    
+    /* Perbaikan ukuran button untuk perangkat sangat kecil */
+    .btn-login, .btn-whatsapp, .btn-primary {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.75rem;
+    }
+    
+    .btn-login {
+        min-width: 70px;
+    }
+}
+
+/* Penyesuaian tinggi untuk perangkat mobile dalam orientasi landscape */
+@media (max-height: 500px) and (orientation: landscape) {
+    .full-screen-section {
+        min-height: 120vh;
+        padding: 90px 0 30px;
+    }
+    
+    .hero-section .container {
+        padding-top: 70px;
+        padding-bottom: 30px;
+    }
+}
+
+/* Penyesuaian untuk kontak section pada layar kecil */
+@media (max-width: 900px) {
+    .contact-content {
+        flex-direction: column;
+        gap: 2rem;
+        align-items: center;
+    }
+    .contact-map, .contact-info {
+        max-width: 100%;
+        min-width: 0;
+    }
+}
