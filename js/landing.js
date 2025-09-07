@@ -353,13 +353,10 @@ function closeMobileMenu() {
 document.addEventListener('DOMContentLoaded', function() {
     // Inisialisasi navigasi
     initNavigation();
-    
     // Inisialisasi mobile menu
     initMobileMenu();
-    
     // Pastikan halaman di-scroll ke atas saat dimuat
     window.scrollTo(0, 0);
-    
     // Tutup menu mobile saat klik di luar menu
     document.addEventListener('click', function(e) {
         const hamburger = document.querySelector('.hamburger-menu');
