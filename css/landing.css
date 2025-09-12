@@ -71,7 +71,7 @@ a{text-decoration:none;color:inherit}
 .slider-prev{left:10px}.slider-next{right:10px}
 .slider-dots{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:8px}
 .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.6);transition:var(--tr)}
-.dot.active{background:#fff;transform:scale(1.15)}
+.dot.active{background:var(--primary);transform:scale(1.15)}
 
 /* ABOUT + slider */
 .about-section{padding:var(--sp12) 0;background:#fff}
@@ -89,8 +89,9 @@ a{text-decoration:none;color:inherit}
 .slider-prev-about,.slider-next-about{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border:none;border-radius:50%;background:rgba(0,0,0,.18);color:#fff;display:grid;place-items:center;cursor:pointer}
 .slider-prev-about{left:14px}.slider-next-about{right:14px}
 .slider-dots-about{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:8px}
-.slider-dots-about .dot{background:rgba(0,0,0,.25)}
-
+/* .slider-dots-about .dot{background:var(--primary)} */
+.slider-dots-about .dot{width:10px;height:10px;border-radius:50%;background:rgba(124, 120, 120, 0.6);transition:var(--tr)}
+.slider-dots-about .dot.active{background:var(--primary);transform:scale(1.15)}
 /* FITUR/PRODUK */
 .features-section{background:var(--secondary);padding:var(--sp12) 0}
 .products-grid{display:grid;gap:var(--sp6);margin-bottom:var(--sp6)}
