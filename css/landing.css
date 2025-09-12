@@ -129,6 +129,27 @@ a{text-decoration:none;color:inherit}
 .footer-links a:hover{color:#fff}
 .footer-bottom{border-top:1px solid rgba(255,255,255,.12);padding-top:var(--sp4);text-align:center;color:#ddd}
 .footer-logo{height:10rem;width:auto;margin-bottom:var(--sp2)}
+
+/* Statistik */
+.improve-chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--secondary);
+  padding: 1rem;
+  border: 1px solid #ccc; /* Border rapi */
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-width: 700px;
+  margin: 0 auto 2rem auto;
+}
+
+.improve {
+  width: 100% !important;   /* Chart penuh sesuai container */
+  height: auto !important;  /* Tinggi fleksibel */
+}
+
+
 /* =============================================
    BREAKPOINTS (3 saja)
    ============================================= */
@@ -154,6 +175,7 @@ a{text-decoration:none;color:inherit}
   .products-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .contact-content{flex-direction:column;align-items:center}
   .contact-map iframe{height:300px}
+  .about-chart{height:360px}
 }
 
 /* MOBILE ≤600px */

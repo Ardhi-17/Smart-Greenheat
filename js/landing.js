@@ -336,3 +336,50 @@ function markNavPanel() {
 }
 window.addEventListener('resize', markNavPanel);
 document.addEventListener('DOMContentLoaded', markNavPanel);
+
+// Chart.js untuk Perbandingan Sebelum vs Sesudah Pemakaian Alat Smart GreenHeat
+document.addEventListener("DOMContentLoaded", function () {
+  const ctx = document.getElementById("Provide");
+
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Kondisi Percobaan"],
+      datasets: [
+        {
+          label: "Sebelum Pakai Smart GreenHeat",
+          data: [24],
+          backgroundColor: "rgba(255, 154, 0, 0.7)",
+          borderColor: "rgba(255, 154, 0, 1)",
+          borderWidth: 1,
+        },
+        {
+          label: "Setelah Pakai Smart GreenHeat",
+          data: [12],
+          backgroundColor: "rgba(79, 32, 13, 0.7)",
+          borderColor: "rgba(79, 32, 13, 1)",
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false, // ✅ Supaya responsif
+      plugins: {
+        legend: {
+          position: "top",
+          labels: { boxWidth: 20 },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: "Hari" },
+          ticks: { stepSize: 5 },
+        },
+      },
+    },
+  });
+});
+
+
