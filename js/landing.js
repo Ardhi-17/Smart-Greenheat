@@ -23,22 +23,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Form submission
-document.querySelector('.contact-form form')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    // Ambil data form
-    const name = this.querySelector('input[type="text"]').value;
-    const email = this.querySelector('input[type="email"]').value;
-    const message = this.querySelector('textarea').value;
-
-    // Tampilkan pesan sukses
-    alert('Terima kasih! Pesan Anda telah terkirim.');
-
-    // Reset form
-    this.reset();
-});
-
 // Animation on scroll
 const observerOptions = {
     root: null,
@@ -58,22 +42,6 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.feature-card, .about-content, .contact-content').forEach(el => {
     observer.observe(el);
 });
-
-// Tambahkan animasi ke CSS
-const style = document.createElement('style');
-style.textContent = `
-    .feature-card, .about-content, .contact-content {
-        opacity: 0;
-        transform: translateY(30px);
-        transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-
-    .feature-card.animate, .about-content.animate, .contact-content.animate {
-        opacity: 1;
-        transform: translateY(0);
-    }
-`;
-document.head.appendChild(style);
 
 // Fungsi untuk menangani navigasi dan highlight menu
 function initNavigation() {
@@ -159,6 +127,19 @@ function initMobileMenu() {
     }
 }
 
+// jadikan .main-nav panel di tablet/HP
+function markNavPanel(){
+  const nav = document.querySelector('.main-nav');
+  if (!nav) return;
+  if (window.innerWidth <= 1023) nav.classList.add('is-panel');
+  else nav.classList.remove('is-panel','active');
+}
+window.addEventListener('resize', () => {
+  markNavPanel();
+  if (window.innerWidth >= 1024) closeMobileMenu();
+});
+document.addEventListener('DOMContentLoaded', markNavPanel);
+
 // Fungsi untuk menutup mobile menu
 function closeMobileMenu() {
     const hamburger = document.querySelector('.hamburger-menu');
@@ -171,7 +152,7 @@ function closeMobileMenu() {
     }
 }
 
-// --- Kode Slider Hero Section yang Telah Diperbaiki ---
+// --- Kode Slider Hero Section ---
 (function() {
     const sliderContainer = document.querySelector('.slider-container');
     if (!sliderContainer) return;
@@ -184,81 +165,69 @@ function closeMobileMenu() {
 
     let currentSlide = 0;
     let slideInterval = null;
-    const SLIDE_INTERVAL = 3500; // 3.5 detik
+    const SLIDE_INTERVAL = 5000; // 5 detik
 
-    // Fungsi untuk menampilkan slide
     function showSlide(index) {
-        // Geser slider menggunakan transform
         sliderWrapper.style.transform = `translateX(-${index * 100}%)`;
 
-        // Reset semua dot
-        dots.forEach(dot => {
-            dot.classList.remove('active');
-        });
-
-        // Aktifkan dot yang sesuai
+        dots.forEach(dot => dot.classList.remove('active'));
         dots[index].classList.add('active');
 
         currentSlide = index;
     }
 
-    // Fungsi untuk slide berikutnya
     function nextSlide() {
         let next = (currentSlide + 1) % slides.length;
         showSlide(next);
     }
 
-    // Fungsi untuk slide sebelumnya
     function prevSlide() {
         let prev = (currentSlide - 1 + slides.length) % slides.length;
         showSlide(prev);
     }
 
-    // Fungsi untuk memulai slider otomatis
     function startSlider() {
+        stopSlider(); // pastikan clear dulu
         slideInterval = setInterval(nextSlide, SLIDE_INTERVAL);
     }
 
-    // Fungsi untuk menghentikan slider otomatis
     function stopSlider() {
-        clearInterval(slideInterval);
+        if (slideInterval) {
+            clearInterval(slideInterval);
+            slideInterval = null;
+        }
     }
 
-    // Event listener untuk tombol next
     if (nextBtn) {
-        nextBtn.addEventListener('click', function() {
+        nextBtn.addEventListener('click', () => {
             nextSlide();
-            stopSlider();
-            startSlider(); // Restart timer
+            startSlider(); // reset timer
         });
     }
 
-    // Event listener untuk tombol prev
     if (prevBtn) {
-        prevBtn.addEventListener('click', function() {
+        prevBtn.addEventListener('click', () => {
             prevSlide();
-            stopSlider();
-            startSlider(); // Restart timer
+            startSlider(); // reset timer
         });
     }
 
-    // Event listener untuk dot indicators
     dots.forEach((dot, index) => {
-        dot.addEventListener('click', function() {
+        dot.addEventListener('click', () => {
             showSlide(index);
-            stopSlider();
-            startSlider(); // Restart timer
+            startSlider(); // reset timer
         });
     });
 
-    // Pause slider saat mouse hover
+    // Pause saat hover
     sliderContainer.addEventListener('mouseenter', stopSlider);
     sliderContainer.addEventListener('mouseleave', startSlider);
 
-    // Inisialisasi slider
+    // Inisialisasi
     showSlide(0);
     startSlider();
 })();
+
 
 // --- Kode Slider About Section ---
 (function() {
@@ -273,81 +242,69 @@ function closeMobileMenu() {
     
     let currentSlide = 0;
     let slideInterval = null;
-    const SLIDE_INTERVAL = 5000; // 5 detik
+    const SLIDE_INTERVAL = 10000; // 10 detik
     
-    // Fungsi untuk menampilkan slide
     function showSlide(index) {
-        // Geser slide menggunakan transform
         sliderWrapper.style.transform = `translateX(-${index * 100}%)`;
         
-        // Reset semua dot
-        dots.forEach(dot => {
-            dot.classList.remove('active');
-        });
-        
-        // Aktifkan dot yang sesuai
+        dots.forEach(dot => dot.classList.remove('active'));
         dots[index].classList.add('active');
         
         currentSlide = index;
     }
     
-    // Fungsi untuk slide berikutnya
     function nextSlide() {
         let next = (currentSlide + 1) % slides.length;
         showSlide(next);
     }
     
-    // Fungsi untuk slide sebelumnya
     function prevSlide() {
         let prev = (currentSlide - 1 + slides.length) % slides.length;
         showSlide(prev);
     }
     
-    // Fungsi untuk memulai slider otomatis
     function startSlider() {
+        stopSlider(); // clear sebelum set baru
         slideInterval = setInterval(nextSlide, SLIDE_INTERVAL);
     }
     
-    // Fungsi untuk menghentikan slider otomatis
     function stopSlider() {
-        clearInterval(slideInterval);
+        if (slideInterval) {
+            clearInterval(slideInterval);
+            slideInterval = null;
+        }
     }
     
-    // Event listener untuk tombol next
     if (nextBtn) {
-        nextBtn.addEventListener('click', function() {
+        nextBtn.addEventListener('click', () => {
             nextSlide();
-            stopSlider();
-            startSlider(); // Restart timer
+            startSlider();
         });
     }
     
-    // Event listener untuk tombol prev
     if (prevBtn) {
-        prevBtn.addEventListener('click', function() {
+        prevBtn.addEventListener('click', () => {
             prevSlide();
-            stopSlider();
-            startSlider(); // Restart timer
+            startSlider();
         });
     }
     
-    // Event listener untuk dot indicators
     dots.forEach((dot, index) => {
-        dot.addEventListener('click', function() {
+        dot.addEventListener('click', () => {
             showSlide(index);
-            stopSlider();
-            startSlider(); // Restart timer
+            startSlider();
         });
     });
     
-    // Pause slider saat mouse hover
+    // Pause saat hover
     sliderContainer.addEventListener('mouseenter', stopSlider);
     sliderContainer.addEventListener('mouseleave', startSlider);
     
-    // Inisialisasi slider
+    // Inisialisasi
     showSlide(0);
     startSlider();
 })();
+
 
 // Panggil fungsi saat DOM siap
 document.addEventListener('DOMContentLoaded', function() {
@@ -369,3 +326,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// jadikan .main-nav sebagai panel pada tablet/HP
+function markNavPanel() {
+  const nav = document.querySelector('.main-nav');
+  if (!nav) return;
+  if (window.innerWidth <= 1023) nav.classList.add('is-panel');
+  else nav.classList.remove('is-panel','active');
+}
+window.addEventListener('resize', markNavPanel);
+document.addEventListener('DOMContentLoaded', markNavPanel);
