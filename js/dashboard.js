@@ -1,9 +1,7 @@
-/* DASHBOARD — Chart + Logs Persisten + Watchdog Online/Offline
-   - Grafik (Chart.js) sumber data: /logs (persisten)
-   - Kartu nilai live: /sensors, /status
-   - Filter 15m / 1h / 6h / 24h / All
-   - Export CSV dari /logs sesuai rentang filter aktif
-   - Kontrol: start / stop / refresh(reboot) / wifi_reconfig
+/* DASHBOARD — Chart + Logs Persisten + Watchdog Online/Offline (fix ketat)
+   - Online hanya jika heartbeat (status/lastSeen) segar DAN client online
+   - UI full disable saat offline + modal
+   - Perbaikan href Wi-Fi (wifiReconfig) & bottom-nav active
 */
 
 (() => {
@@ -27,18 +25,18 @@
   let hbTimer = null;
   let SERVER_OFFSET_MS = 0;
   let LAST_SEEN_MS = 0;
+  let hasHeartbeat = false;             // <- wajib sudah pernah terima heartbeat
   let lastAnyEventAt = 0;               // cap waktu event RTDB terakhir (sensors/status)
 
   // Tuning deteksi online
   const FRESH_MS           = 9000;      // lastSeen <= 9s → fresh
-  const QUIET_MS           = 15000;     // stream sensors/status <= 15s → fresh
   const STARTUP_GRACE_MS   = 15000;     // 15s awal: jangan tampilkan modal offline
   let appStartedAt         = Date.now();
   let offlineLatchAt       = 0;         // anti flicker modal offline
 
   // ===== Chart =====
   let chart = null;
-  const MAX_POINTS = 2000;              // batas render; Chart.js decimation juga aktif
+  const MAX_POINTS = 2000;
 
   // ===== Utilities =====
   const serverNow = () => Date.now() + (SERVER_OFFSET_MS || 0);
@@ -80,20 +78,37 @@
   }
 
   // ===== Online/Offline UI =====
+  function setUIEnabled(isOnline) {
+    // Section disable
+    ['chart-section','control-section'].forEach(id=>{
+      const sec = document.getElementById(id);
+      if (!sec) return;
+      sec.classList.toggle('disabled', !isOnline);
+      sec.setAttribute('aria-disabled', String(!isOnline));
+    });
+
+    // Buttons disable (semua)
+    document.querySelectorAll('button').forEach(b=>{
+      // biarkan tombol modal & toast close tetap aktif
+      const keep = b.closest('#device-offline-modal, #logout-modal');
+      b.disabled = !isOnline && !keep;
+    });
+
+    // Range buttons
+    $$('.range-btn').forEach(b=> b.disabled = !isOnline);
+  }
+
   function setDeviceOnline(isOnline) {
-    const controlSection = document.getElementById('control-section');
-    if (controlSection) controlSection.classList.toggle('disabled', !isOnline);
-    setButtonsDisabled(!isOnline);
+    setUIEnabled(isOnline);
+
+    // mobile hint: nothing
   }
-  function setButtonsDisabled(disabled) {
-    document.querySelectorAll('.control-btn').forEach(b=> b.disabled = disabled);
-    const exportBtn = document.querySelector('.export-btn');
-    if (exportBtn) exportBtn.disabled = false; // export dari logs tetap boleh meski offline
-  }
+
   function showOfflineModal(show){
     const m = document.getElementById('device-offline-modal');
     if (m) m.style.display = show ? 'block' : 'none';
   }
+
   function updateOnlineState(isOnline){
     if (deviceOnline === isOnline) return;
     deviceOnline = isOnline;
@@ -108,15 +123,14 @@
     }
   }
 
-  // ===== Heartbeat watch (dengan grace & anti-flicker) =====
+  // ===== Heartbeat watch (strict) =====
   function evaluateOnlineNow(){
     const now = Date.now();
 
-    // Online bila SALAH SATU segar (heartbeat ATAU stream sensors/status)
-    const beatFresh   = (LAST_SEEN_MS > 0) && ((serverNow() - LAST_SEEN_MS) <= FRESH_MS);
-    const streamFresh = (lastAnyEventAt > 0) && ((now - lastAnyEventAt) <= QUIET_MS);
-    const clientOk    = navigator.onLine;
-    const shouldBeOnline = (beatFresh || streamFresh) && clientOk;
+    // Online hanya jika HEARTBEAT segar & klien online
+    const beatFresh   = hasHeartbeat && (LAST_SEEN_MS > 0) && ((serverNow() - LAST_SEEN_MS) <= FRESH_MS);
+    const clientOk    = navigator.onLine === true;
+    const shouldBeOnline = beatFresh && clientOk;
 
     // Startup grace: jangan paksa offline di 15 detik pertama
     if (!shouldBeOnline && (now - appStartedAt) < STARTUP_GRACE_MS) return;
@@ -130,9 +144,10 @@
       updateOnlineState(true);
     }
   }
+
   function startHeartbeatWatch(){
     if (hbTimer) return;
-    hbTimer = setInterval(evaluateOnlineNow, 2000);
+    hbTimer = setInterval(evaluateOnlineNow, 1500);
   }
   function stopHeartbeatWatch(){ if (hbTimer){ clearInterval(hbTimer); hbTimer=null; } }
 
@@ -224,7 +239,7 @@
     const base = db.ref('logs').orderByChild('ts');
     let qRef;
     if (rangeMinutes === 'all') {
-      qRef = base.limitToLast(30000); // amankan kalau histori panjang
+      qRef = base.limitToLast(30000);
     } else {
       const startTs = Date.now() - (Number(rangeMinutes) * 60 * 1000);
       qRef = base.startAt(startTs).limitToLast(10000);
@@ -251,6 +266,7 @@
   // ===== Export CSV =====
   function exportData(){
     if (!currentUser) { showToast('Akses Ditolak','Silakan login dulu','warning'); return; }
+    if (!deviceOnline) { showToast('Perangkat Offline','Tidak dapat mengekspor saat offline','warning'); return; }
     if (!logs.length){ showToast('Tidak ada data','Belum ada log pada rentang ini','warning'); return; }
 
     let csv = "data:text/csv;charset=utf-8,";
@@ -270,9 +286,9 @@
   // ===== Controls =====
   function sendCommand(action){
     if (!currentUser) { showToast('Akses Ditolak','Silakan login dulu','warning'); return; }
-    if (deviceOnline === false){ showToast('Perangkat Offline','Tidak dapat mengirim perintah','warning'); return; }
+    if (!deviceOnline){ showToast('Perangkat Offline','Tidak dapat mengirim perintah','warning'); return; }
 
-    setButtonsDisabled(true);
+    setUIEnabled(false);
     db.ref('controls/action').set(action)
       .then(()=>{
         const msg = action==='start' ? 'Sistem akan dihidupkan'
@@ -281,10 +297,10 @@
                   : action==='wifi_reconfig' ? 'Masuk mode ganti Wi-Fi (portal)…'
                   : 'Perintah terkirim';
         showToast('Perintah Dikirim', msg, 'info', 1600);
-        setTimeout(()=> db.ref('controls/action').set('').finally(()=> setButtonsDisabled(false)), 900);
+        setTimeout(()=> db.ref('controls/action').set('').finally(()=> setUIEnabled(true)), 900);
       })
       .catch(err=>{
-        setButtonsDisabled(false);
+        setUIEnabled(true);
         showToast('Error', 'Gagal mengirim perintah: ' + err.message, 'error');
       });
   }
@@ -306,7 +322,7 @@
     // live sensors (cards)
     sensorsRef = db.ref('sensors');
     sensorsRef.on('value', snap => {
-      lastAnyEventAt = Date.now();
+      lastAnyEventAt = Date.now(); // info tambahan (tidak dipakai untuk online lagi)
       const d = snap.val() || {};
       const t = (typeof d.temperature === 'number') ? d.temperature : null;
       const h = (typeof d.moisture    === 'number') ? d.moisture    : null;
@@ -314,46 +330,49 @@
       setText('humidity-value', h!==null ? h : '--');
       if (t!==null) setProgress('temp-progress', t, 100);
       if (h!==null) setProgress('humidity-progress', h, 100);
-      evaluateOnlineNow(); // setiap event, perbarui state
     });
 
-    // status
+    // status (hanya untuk info UI)
     statusRef = db.ref('status');
     statusRef.on('value', snap => {
-      lastAnyEventAt = Date.now();
       const d = snap.val() || {};
       setText('status-value', d.running ? 'RUNNING' : 'STOPPED');
       setText('source-value', d.lastCommandSource ? String(d.lastCommandSource).toUpperCase() : '--');
-      evaluateOnlineNow();
     });
 
-    // heartbeat lastSeen (server timestamp)
+    // heartbeat lastSeen (server timestamp) — satu-satunya sinyal online
     lastSeenRef = db.ref('status/lastSeen');
     lastSeenRef.on('value', snap => {
       const v = snap.val();
       LAST_SEEN_MS = (typeof v === 'number') ? v : Number(v || 0);
+      hasHeartbeat = LAST_SEEN_MS > 0;
       evaluateOnlineNow();
     });
 
     // mulai watchdog berkala
     startHeartbeatWatch();
+
+    // dengarkan event online/offline dari browser
+    window.addEventListener('online',  evaluateOnlineNow);
+    window.addEventListener('offline', evaluateOnlineNow);
   }
 
   function bindRangeButtons(){
     $$('.range-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
+        if (!deviceOnline) { showOfflineModal(true); return; }
         $$('.range-btn').forEach(b=> b.classList.remove('active'));
         btn.classList.add('active');
         const v = btn.getAttribute('data-min');
         rangeMinutes = (v==='all') ? 'all' : Number(v);
-        attachLogsListener(); // fetch ulang dari /logs sesuai range
+        attachLogsListener();
       });
     });
   }
 
   // ===== Modal / Auth buttons =====
-  function toggleAuth(){ document.getElementById('logout-modal')?.style && (document.getElementById('logout-modal').style.display='block'); }
-  function closeModal(){  document.getElementById('logout-modal')?.style && (document.getElementById('logout-modal').style.display='none'); }
+  function toggleAuth(){ const m = document.getElementById('logout-modal'); if (m) m.style.display='block'; }
+  function closeModal(){  const m = document.getElementById('logout-modal'); if (m) m.style.display='none'; }
   function logout(){
     auth.signOut()
       .then(()=>{ showToast('Logout Berhasil','Anda telah keluar','success'); setTimeout(()=> location.href='login.html', 900); })
@@ -362,7 +381,7 @@
 
   // ===== Boot =====
   document.addEventListener('DOMContentLoaded', () => {
-    // Kunci kontrol di awal, tapi JANGAN munculkan modal offline dulu
+    // Kunci kontrol di awal, JANGAN munculkan modal offline dulu
     setDeviceOnline(false);
 
     // Loading overlay auto-hide
@@ -371,6 +390,16 @@
     // Init Chart & rentang
     initChart();
     bindRangeButtons();
+
+    // Bottom-nav active (untuk halaman ini)
+    const nav = document.querySelector('.mobile-nav');
+    if (nav){
+      const page = nav.getAttribute('data-page') || 'dashboard';
+      nav.querySelectorAll('.nav-item').forEach(a=>{
+        const isActive = a.getAttribute('href')?.includes(`${page}.html`);
+        if (isActive) a.classList.add('active');
+      });
+    }
 
     // Auth
     auth.onAuthStateChanged(user=>{
@@ -397,6 +426,8 @@
     sensorsRef?.off(); statusRef?.off(); lastSeenRef?.off();
     detachLogsListener();
     stopHeartbeatWatch();
+    window.removeEventListener('online', evaluateOnlineNow);
+    window.removeEventListener('offline', evaluateOnlineNow);
   });
 
   // ===== Expose to HTML =====
@@ -414,8 +445,9 @@
     now: Date.now(),
     serverNow: serverNow(),
     LAST_SEEN_MS,
+    hasHeartbeat,
     ageHeartbeatMs: serverNow() - LAST_SEEN_MS,
-    lastStreamAgeMs: Date.now() - lastAnyEventAt,
-    deviceOnline
+    deviceOnline,
+    clientOnline: navigator.onLine
   });
 })();
