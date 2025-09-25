@@ -141,13 +141,110 @@
       </div>
     </div>
 
-    <!-- ===== Pengaturan (placeholder agar tidak 404) ===== -->
+    <!-- ===== Pengaturan ===== -->
     <a id="settings-section" class="anchor"></a>
-    <div class="section">
+    <div class="section settings-section">
       <div class="section-header">
         <h2><i class="fas fa-cog" aria-hidden="true"></i> Pengaturan</h2>
       </div>
-      <p>Halaman pengaturan akan ditambahkan di versi berikutnya. Sementara ini, penggantian Wi-Fi bisa dari tombol <b>Ganti Wi-Fi</b> pada bagian Kontrol Sistem.</p>
+
+      <div class="settings-grid">
+        <!-- Kartu: Perangkat & Lokasi (contoh singkat) -->
+        <div class="setting-card">
+          <div class="setting-card-header">
+            <i class="fas fa-microchip"></i>
+            <div>
+              <h3>Perangkat & Lokasi</h3>
+              <p class="muted">Identitas perangkat untuk memudahkan identifikasi.</p>
+            </div>
+          </div>
+          <div class="setting-card-body">
+            <div class="form-row">
+              <label for="dev-name">Nama Perangkat</label>
+              <input id="dev-name" type="text" placeholder="GreenHeat-01" disabled />
+            </div>
+            <div class="form-row two">
+              <div>
+                <label for="dev-room">Lokasi</label>
+                <input id="dev-room" type="text" placeholder="Ruang 3" disabled />
+              </div>
+              <div>
+                <label for="dev-tz">Zona Waktu</label>
+                <input id="dev-tz" type="text" placeholder="Asia/Jakarta" disabled />
+              </div>
+            </div>
+          </div>
+          <div class="setting-card-footer">
+            <button class="btn btn-secondary" type="button" disabled>Simpan</button>
+          </div>
+        </div>
+
+        <!-- Kartu: Jaringan (ada action bar di bawah) -->
+        <div class="setting-card">
+          <div class="setting-card-header">
+            <i class="fas fa-wifi"></i>
+            <div>
+              <h3>Jaringan</h3>
+              <p class="muted">Status koneksi & tindakan konfigurasi Wi-Fi.</p>
+            </div>
+          </div>
+
+          <div class="setting-card-body">
+            <div class="form-row two">
+              <div>
+                <label>SSID Aktif</label>
+                <div id="net-ssid" class="pill">—</div>
+              </div>
+              <div>
+                <label>Kekuatan Sinyal</label>
+                <div id="net-rssi" class="pill">—</div>
+              </div>
+            </div>
+            <div class="form-row two">
+              <div>
+                <label>Alamat IP</label>
+                <div id="net-ip" class="pill">—</div>
+              </div>
+              <div>
+                <label>Status</label>
+                <div id="net-status" class="pill">OFFLINE</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action bar lengket di bawah kartu -->
+          <div class="setting-sticky-actions">
+            <div class="left-note">
+              <i class="fas fa-circle-info"></i>
+              <span>Untuk mengganti jaringan, perangkat akan masuk ke portal konfigurasi.</span>
+            </div>
+            <div class="right-actions">
+              <button class="btn btn-outline" type="button" onclick="testConnection()">
+                <i class="fas fa-plug-circle-bolt"></i> Uji Koneksi
+              </button>
+              <button class="btn btn-primary" type="button" onclick="wifiReconfig()">
+                <i class="fas fa-wifi"></i> Ganti Wi-Fi
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kartu: Zona Berbahaya (contoh) -->
+        <div class="setting-card danger">
+          <div class="setting-card-header">
+            <i class="fas fa-triangle-exclamation"></i>
+            <div>
+              <h3>Zona Berbahaya</h3>
+              <p class="muted">Tindakan ini berisiko. Pastikan Anda paham konsekuensinya.</p>
+            </div>
+          </div>
+          <div class="setting-card-body">
+            <button class="btn btn-danger" type="button" onclick="confirmFactoryReset()">
+              <i class="fas fa-bomb"></i> Reset ke Default
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Modal Logout -->
