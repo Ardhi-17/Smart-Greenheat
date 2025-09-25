@@ -1,7 +1,7 @@
-/* DASHBOARD — Chart + Logs Persisten + Watchdog Online/Offline (fix ketat)
-   - Online hanya jika heartbeat (status/lastSeen) segar DAN client online
-   - UI full disable saat offline + modal
-   - Perbaikan href Wi-Fi (wifiReconfig) & bottom-nav active
+/* DASHBOARD — Chart + Logs Persisten + Watchdog Online/Offline (strict)
+   - Online HANYA jika heartbeat (status/lastSeen) segar DAN navigator.onLine = true
+   - UI terkunci saat offline + modal tampil
+   - Navigasi mobile: single-page anchors (tidak memuat file lain → tanpa 404)
 */
 
 (() => {
@@ -16,23 +16,22 @@
   let sensorsRef = null, statusRef = null, lastSeenRef = null;
 
   // Logs (grafik)
-  let logsQueryRef = null;              // ref aktif untuk listener logs
-  const logs = [];                      // cache logs: {ts,t,h}
-  let rangeMinutes = 15;                // 15m | 60 | 360 | 1440 | 'all'
+  let logsQueryRef = null;
+  const logs = [];
+  let rangeMinutes = 15;
 
   // ===== Watchdog =====
   let deviceOnline = null;
   let hbTimer = null;
   let SERVER_OFFSET_MS = 0;
   let LAST_SEEN_MS = 0;
-  let hasHeartbeat = false;             // <- wajib sudah pernah terima heartbeat
-  let lastAnyEventAt = 0;               // cap waktu event RTDB terakhir (sensors/status)
+  let hasHeartbeat = false;
 
-  // Tuning deteksi online
-  const FRESH_MS           = 9000;      // lastSeen <= 9s → fresh
-  const STARTUP_GRACE_MS   = 15000;     // 15s awal: jangan tampilkan modal offline
-  let appStartedAt         = Date.now();
-  let offlineLatchAt       = 0;         // anti flicker modal offline
+  // Tuning online
+  const FRESH_MS         = 9000;   // heartbeat segar <= 9s
+  const STARTUP_GRACE_MS = 15000;  // 15s awal: jangan paksa offline
+  let appStartedAt       = Date.now();
+  let offlineLatchAt     = 0;
 
   // ===== Chart =====
   let chart = null;
@@ -40,16 +39,8 @@
 
   // ===== Utilities =====
   const serverNow = () => Date.now() + (SERVER_OFFSET_MS || 0);
-  const log = (...a) => console.log('[DASH]', ...a);
-
   const $  = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
-  const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
-  const setProgress = (id, value, maxValue) => {
-    const el = document.getElementById(id);
-    if (!el || typeof value!=='number' || !isFinite(value) || maxValue<=0) return;
-    el.style.width = Math.max(0, Math.min(100, (value/maxValue)*100)) + '%';
-  };
   const getCss = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const hexToRGBA = (hex, a) => {
     const m = hex.replace('#','');
@@ -57,13 +48,19 @@
     const r=(v>>16)&255, g=(v>>8)&255, b=v&255;
     return `rgba(${r},${g},${b},${a})`;
   };
+  const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  const setProgress = (id, value, maxValue) => {
+    const el = document.getElementById(id);
+    if (!el || typeof value!=='number' || !isFinite(value) || maxValue<=0) return;
+    el.style.width = Math.max(0, Math.min(100, (value/maxValue)*100)) + '%';
+  };
 
   // ===== Toast =====
-  function showToast(title, message, type='info', duration=4000){
+  function showToast(title, message, type='info', duration=3000){
     const prev = document.querySelector('.toast'); if (prev) prev.remove();
     const toast = document.createElement('div');
     toast.className = `toast toast-${type} show`;
-    let icon='ℹ️'; if(type==='success')icon='✅'; else if(type==='warning')icon='⚠️'; else if(type==='error')icon='❌';
+    const icon = type==='success'?'✅':type==='warning'?'⚠️':type==='error'?'❌':'ℹ️';
     toast.innerHTML = `
       <div class="toast-icon">${icon}</div>
       <div class="toast-content">
@@ -79,29 +76,18 @@
 
   // ===== Online/Offline UI =====
   function setUIEnabled(isOnline) {
-    // Section disable
-    ['chart-section','control-section'].forEach(id=>{
-      const sec = document.getElementById(id);
-      if (!sec) return;
+    // kunci semua section
+    document.querySelectorAll('.section').forEach(sec=>{
       sec.classList.toggle('disabled', !isOnline);
       sec.setAttribute('aria-disabled', String(!isOnline));
     });
-
-    // Buttons disable (semua)
+    // tombol (kecuali tombol di dalam modal offline dan tombol logout-modal)
     document.querySelectorAll('button').forEach(b=>{
-      // biarkan tombol modal & toast close tetap aktif
       const keep = b.closest('#device-offline-modal, #logout-modal');
       b.disabled = !isOnline && !keep;
     });
-
-    // Range buttons
+    // range tabs
     $$('.range-btn').forEach(b=> b.disabled = !isOnline);
-  }
-
-  function setDeviceOnline(isOnline) {
-    setUIEnabled(isOnline);
-
-    // mobile hint: nothing
   }
 
   function showOfflineModal(show){
@@ -112,30 +98,24 @@
   function updateOnlineState(isOnline){
     if (deviceOnline === isOnline) return;
     deviceOnline = isOnline;
-
-    setDeviceOnline(isOnline);
+    setUIEnabled(isOnline);
     if (isOnline) {
       showOfflineModal(false);
-      showToast('Perangkat Online', 'Koneksi mesin tersambung kembali', 'success', 1200);
+      showToast('Perangkat Online','Koneksi mesin tersambung kembali','success',1200);
     } else {
       showOfflineModal(true);
-      showToast('Perangkat Offline', 'Hubungkan koneksi internet pada Mesin', 'warning', 2000);
+      showToast('Perangkat Offline','Hubungkan koneksi internet pada Mesin','warning',2000);
     }
   }
 
-  // ===== Heartbeat watch (strict) =====
   function evaluateOnlineNow(){
     const now = Date.now();
-
-    // Online hanya jika HEARTBEAT segar & klien online
     const beatFresh   = hasHeartbeat && (LAST_SEEN_MS > 0) && ((serverNow() - LAST_SEEN_MS) <= FRESH_MS);
     const clientOk    = navigator.onLine === true;
     const shouldBeOnline = beatFresh && clientOk;
 
-    // Startup grace: jangan paksa offline di 15 detik pertama
     if (!shouldBeOnline && (now - appStartedAt) < STARTUP_GRACE_MS) return;
 
-    // Anti-flicker: baru deklarasi offline kalau kondisi buruk ≥ 4s
     if (!shouldBeOnline) {
       if (!offlineLatchAt) offlineLatchAt = now;
       if ((now - offlineLatchAt) >= 4000) updateOnlineState(false);
@@ -144,11 +124,7 @@
       updateOnlineState(true);
     }
   }
-
-  function startHeartbeatWatch(){
-    if (hbTimer) return;
-    hbTimer = setInterval(evaluateOnlineNow, 1500);
-  }
+  function startHeartbeatWatch(){ if (!hbTimer) hbTimer = setInterval(evaluateOnlineNow, 1500); }
   function stopHeartbeatWatch(){ if (hbTimer){ clearInterval(hbTimer); hbTimer=null; } }
 
   // ===== Chart =====
@@ -160,67 +136,34 @@
 
     chart = new Chart(ctx, {
       type: 'line',
-      data: {
-        labels: [],
-        datasets: [
-          {
-            label: 'Suhu (°C)',
-            data: [],
-            yAxisID: 'yTemp',
-            borderColor: colorTemp,
-            backgroundColor: hexToRGBA(colorTemp, 0.15),
-            borderWidth: 2, pointRadius: 0, tension: 0.35
-          },
-          {
-            label: 'Kelembapan (%)',
-            data: [],
-            yAxisID: 'yHum',
-            borderColor: colorHum,
-            backgroundColor: hexToRGBA(colorHum, 0.15),
-            borderWidth: 2, pointRadius: 0, tension: 0.35
-          }
-        ]
-      },
+      data: { labels: [], datasets: [
+        { label:'Suhu (°C)', data:[], yAxisID:'yTemp', borderColor:colorTemp, backgroundColor:hexToRGBA(colorTemp,.15), borderWidth:2, pointRadius:0, tension:.35 },
+        { label:'Kelembapan (%)', data:[], yAxisID:'yHum', borderColor:colorHum, backgroundColor:hexToRGBA(colorHum,.15), borderWidth:2, pointRadius:0, tension:.35 },
+      ]},
       options: {
         responsive:true, maintainAspectRatio:false, animation:false,
         interaction:{ mode:'index', intersect:false },
-        plugins:{
-          legend:{ position:'top' },
-          tooltip:{ callbacks:{
-            title:(items)=> items[0]?.label || '',
-            label:(ctx)=>{
-              const v = ctx.parsed.y;
-              return ctx.dataset.yAxisID==='yTemp'
-                ? `Suhu: ${Number(v).toFixed(1)} °C`
-                : `Kelembapan: ${v} %`;
-            }
-          }},
-          decimation:{ enabled:true, algorithm:'lttb', samples: 1000 }
-        },
+        plugins:{ legend:{position:'top'}, decimation:{enabled:true,algorithm:'lttb',samples:1000} },
         scales:{
           x:{ ticks:{ maxRotation:0, autoSkip:true, maxTicksLimit:8 }, grid:{ display:false } },
-          yTemp:{ position:'left', title:{ display:true, text:'°C' } },
-          yHum :{ position:'right', title:{ display:true, text:'%' }, suggestedMin:0, suggestedMax:100, grid:{ drawOnChartArea:false } }
+          yTemp:{ position:'left', title:{display:true,text:'°C'} },
+          yHum:{ position:'right', title:{display:true,text:'%'}, suggestedMin:0, suggestedMax:100, grid:{drawOnChartArea:false} }
         }
       }
     });
   }
-
-  function msToLabel(ms){
+  const msToLabel = (ms)=> {
     const d=new Date(ms), today=new Date();
     return (d.toDateString()===today.toDateString()) ? d.toLocaleTimeString() : d.toLocaleString();
-  }
-
+  };
   function renderChartFromLogs(){
     if (!chart) initChart();
     if (!chart) return;
-
     const step = Math.max(1, Math.ceil(logs.length / MAX_POINTS));
     const labels = [], t = [], h = [];
     for (let i=0;i<logs.length;i+=step){
       labels.push(msToLabel(logs[i].ts));
-      t.push(logs[i].t);
-      h.push(logs[i].h);
+      t.push(logs[i].t); h.push(logs[i].h);
     }
     chart.data.labels = labels;
     chart.data.datasets[0].data = t;
@@ -228,28 +171,21 @@
     chart.update('none');
   }
 
-  // ===== Logs listener =====
-  function detachLogsListener(){
-    if (logsQueryRef) { logsQueryRef.off(); logsQueryRef = null; }
-  }
+  // ===== Logs =====
+  function detachLogsListener(){ if (logsQueryRef) { logsQueryRef.off(); logsQueryRef = null; } }
   function attachLogsListener(){
     detachLogsListener();
     logs.length = 0;
-
     const base = db.ref('logs').orderByChild('ts');
-    let qRef;
-    if (rangeMinutes === 'all') {
-      qRef = base.limitToLast(30000);
-    } else {
-      const startTs = Date.now() - (Number(rangeMinutes) * 60 * 1000);
-      qRef = base.startAt(startTs).limitToLast(10000);
-    }
+    const qRef = (rangeMinutes === 'all')
+      ? base.limitToLast(30000)
+      : base.startAt(Date.now() - (Number(rangeMinutes)*60*1000)).limitToLast(10000);
 
     logsQueryRef = qRef;
     qRef.on('value', snap => {
       const arr = [];
-      snap.forEach(child => {
-        const v = child.val() || {};
+      snap.forEach(ch => {
+        const v = ch.val() || {};
         if (typeof v.ts==='number' && typeof v.t==='number' && typeof v.h==='number') {
           arr.push({ ts:v.ts, t:v.t, h:v.h });
         }
@@ -258,15 +194,15 @@
       logs.length = 0; Array.prototype.push.apply(logs, arr);
       renderChartFromLogs();
     }, err => {
-      console.error('logs listener error', err);
+      console.error('logs error', err);
       showToast('Gagal memuat grafik', err?.message || 'Error RTDB', 'error');
     });
   }
 
-  // ===== Export CSV =====
+  // ===== Export =====
   function exportData(){
     if (!currentUser) { showToast('Akses Ditolak','Silakan login dulu','warning'); return; }
-    if (!deviceOnline) { showToast('Perangkat Offline','Tidak dapat mengekspor saat offline','warning'); return; }
+    if (!deviceOnline){ showToast('Perangkat Offline','Tidak dapat mengekspor saat offline','warning'); return; }
     if (!logs.length){ showToast('Tidak ada data','Belum ada log pada rentang ini','warning'); return; }
 
     let csv = "data:text/csv;charset=utf-8,";
@@ -312,17 +248,14 @@
     sendCommand('wifi_reconfig');
   }
 
-  // ===== Auth & listeners =====
+  // ===== Realtime listeners =====
   function setupRealtimeListeners(){
-    // server time offset
     db.ref('.info/serverTimeOffset').on('value', snap => {
       SERVER_OFFSET_MS = Number(snap.val() || 0);
     });
 
-    // live sensors (cards)
     sensorsRef = db.ref('sensors');
     sensorsRef.on('value', snap => {
-      lastAnyEventAt = Date.now(); // info tambahan (tidak dipakai untuk online lagi)
       const d = snap.val() || {};
       const t = (typeof d.temperature === 'number') ? d.temperature : null;
       const h = (typeof d.moisture    === 'number') ? d.moisture    : null;
@@ -332,7 +265,6 @@
       if (h!==null) setProgress('humidity-progress', h, 100);
     });
 
-    // status (hanya untuk info UI)
     statusRef = db.ref('status');
     statusRef.on('value', snap => {
       const d = snap.val() || {};
@@ -340,7 +272,6 @@
       setText('source-value', d.lastCommandSource ? String(d.lastCommandSource).toUpperCase() : '--');
     });
 
-    // heartbeat lastSeen (server timestamp) — satu-satunya sinyal online
     lastSeenRef = db.ref('status/lastSeen');
     lastSeenRef.on('value', snap => {
       const v = snap.val();
@@ -349,14 +280,12 @@
       evaluateOnlineNow();
     });
 
-    // mulai watchdog berkala
     startHeartbeatWatch();
-
-    // dengarkan event online/offline dari browser
     window.addEventListener('online',  evaluateOnlineNow);
     window.addEventListener('offline', evaluateOnlineNow);
   }
 
+  // ===== Range buttons =====
   function bindRangeButtons(){
     $$('.range-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -370,52 +299,59 @@
     });
   }
 
-  // ===== Modal / Auth buttons =====
-  function toggleAuth(){ const m = document.getElementById('logout-modal'); if (m) m.style.display='block'; }
-  function closeModal(){  const m = document.getElementById('logout-modal'); if (m) m.style.display='none'; }
+  // ===== Modal / Auth =====
+  function toggleAuth(){ $('#logout-modal').style.display='block'; }
+  function closeModal(){  $('#logout-modal').style.display='none'; }
   function logout(){
     auth.signOut()
       .then(()=>{ showToast('Logout Berhasil','Anda telah keluar','success'); setTimeout(()=> location.href='login.html', 900); })
       .catch(err=> showToast('Error Logout', err.message, 'error'));
   }
 
+  // ===== Mobile nav (single page) =====
+  function setupMobileNav(){
+    const items = document.querySelectorAll('.mobile-nav .nav-item');
+    const setActiveByHash = () => {
+      const hash = location.hash || '#top';
+      items.forEach(a=>{
+        a.classList.toggle('active', a.getAttribute('href') === hash);
+      });
+    };
+    items.forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        const targetSel = a.getAttribute('data-target') || a.getAttribute('href');
+        if (targetSel && targetSel.startsWith('#')) {
+          e.preventDefault();
+          const target = document.querySelector(targetSel);
+          if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
+          history.replaceState(null, '', targetSel);
+          setActiveByHash();
+        }
+      });
+    });
+    window.addEventListener('hashchange', setActiveByHash);
+    setActiveByHash();
+  }
+
   // ===== Boot =====
   document.addEventListener('DOMContentLoaded', () => {
-    // Kunci kontrol di awal, JANGAN munculkan modal offline dulu
-    setDeviceOnline(false);
-
-    // Loading overlay auto-hide
+    setUIEnabled(false); // kunci awal
     setTimeout(()=> document.getElementById('loading-overlay')?.classList.add('hidden'), 900);
 
-    // Init Chart & rentang
     initChart();
     bindRangeButtons();
+    setupMobileNav();
 
-    // Bottom-nav active (untuk halaman ini)
-    const nav = document.querySelector('.mobile-nav');
-    if (nav){
-      const page = nav.getAttribute('data-page') || 'dashboard';
-      nav.querySelectorAll('.nav-item').forEach(a=>{
-        const isActive = a.getAttribute('href')?.includes(`${page}.html`);
-        if (isActive) a.classList.add('active');
-      });
-    }
-
-    // Auth
     auth.onAuthStateChanged(user=>{
       if (!user) { window.location.href = 'login.html'; return; }
       currentUser = user;
       setText('user-status', '👤 ' + (user.email || 'User'));
       document.getElementById('auth-btn')?.classList.remove('hidden');
 
-      // Listener realtime (sensors/status/lastSeen)
       setupRealtimeListeners();
-
-      // Ambil logs sesuai filter default
       attachLogsListener();
     });
 
-    // Hemat resource saat tab di background
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) stopHeartbeatWatch(); else startHeartbeatWatch();
     });
@@ -424,13 +360,12 @@
   // ===== Cleanup =====
   window.addEventListener('beforeunload', ()=>{
     sensorsRef?.off(); statusRef?.off(); lastSeenRef?.off();
-    detachLogsListener();
-    stopHeartbeatWatch();
+    detachLogsListener(); stopHeartbeatWatch();
     window.removeEventListener('online', evaluateOnlineNow);
     window.removeEventListener('offline', evaluateOnlineNow);
   });
 
-  // ===== Expose to HTML =====
+  // Expose
   window.sendCommand   = sendCommand;
   window.refreshData   = refreshData;
   window.exportData    = exportData;
@@ -440,7 +375,7 @@
   window.logout        = logout;
   window.showOfflineModal = showOfflineModal;
 
-  // Debug helper optional
+  // Debug helper
   window.__debugOnline = () => ({
     now: Date.now(),
     serverNow: serverNow(),
