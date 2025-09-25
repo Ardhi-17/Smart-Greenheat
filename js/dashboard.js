@@ -1,9 +1,22 @@
-/* DASHBOARD — strict online check + single-page nav + Settings: Wi-Fi sticky action */
+/* DASHBOARD — strict online check + robust loader fallback + Wi-Fi sticky action */
 
 (() => {
-  // ===== Firebase handles =====
+  // ===== Robust loader helpers =====
+  function hideLoader() {
+    const el = document.getElementById('loading-overlay');
+    if (!el) return;
+    el.classList.add('hidden');           // CSS fade
+    el.style.display = 'none';            // hard hide fallback
+  }
+  // Hide on load event, and hard fallback after 3s, and on any window error
+  window.addEventListener('load', () => setTimeout(hideLoader, 300));
+  setTimeout(hideLoader, 3000);
+  window.addEventListener('error', () => hideLoader());
+
+  // ===== Firebase handles (tolerant jika belum ada) =====
   const db   = window.database;
   const auth = window.auth;
+  const hasFirebase = !!db && !!auth;
 
   // ===== Global state =====
   let currentUser = null;
@@ -70,10 +83,9 @@
     if (deviceOnline === isOnline) return;
     deviceOnline = isOnline;
     setUIEnabled(isOnline);
+    setText('net-status', isOnline? 'ONLINE':'OFFLINE');
     if (isOnline){ showOfflineModal(false); showToast('Perangkat Online','Koneksi mesin tersambung kembali','success',1200); }
     else { showOfflineModal(true); showToast('Perangkat Offline','Hubungkan koneksi internet pada Mesin','warning',2000); }
-    // update badge status di Pengaturan
-    setText('net-status', isOnline? 'ONLINE':'OFFLINE');
   }
   function evaluateOnlineNow(){
     const now=Date.now();
@@ -106,6 +118,7 @@
   // ===== Logs =====
   function detachLogsListener(){ if (logsQueryRef){ logsQueryRef.off(); logsQueryRef=null; } }
   function attachLogsListener(){
+    if (!hasFirebase) return;
     detachLogsListener(); logs.length=0;
     const base=db.ref('logs').orderByChild('ts');
     const qRef=(rangeMinutes==='all')? base.limitToLast(30000) : base.startAt(Date.now()-(Number(rangeMinutes)*60*1000)).limitToLast(10000);
@@ -145,7 +158,6 @@
     if(!confirm('Masuk mode konfigurasi Wi-Fi? Perangkat akan reboot lalu membuka portal "GreenHeat".')) return;
     sendCommand('wifi_reconfig');
   }
-  // Tombol "Uji Koneksi" di Pengaturan → diagnosa cepat
   function testConnection(){
     const fresh = hasHeartbeat && (serverNow()-LAST_SEEN_MS)<=FRESH_MS;
     const clientOk = navigator.onLine===true;
@@ -156,15 +168,16 @@
     ].join(' · ');
     showToast('Diagnostik Koneksi', msg, fresh&&clientOk?'success':'warning', 3500);
   }
-  // (opsional) reset default
   function confirmFactoryReset(){
     if(!currentUser){ showToast('Akses Ditolak','Silakan login dulu','warning'); return; }
     if(!confirm('Reset konfigurasi ke default? Tindakan ini tidak bisa dibatalkan.')) return;
-    showToast('Reset','Konfigurasi akan direset (demo tombol—implementasi write ke /config sesuai kebutuhan).','info',2500);
+    showToast('Reset','(Demo) Implementasikan write ke /config sesuai kebutuhan.','info',2500);
   }
 
   // ===== Realtime listeners =====
   function setupRealtimeListeners(){
+    if (!hasFirebase) return;
+
     db.ref('.info/serverTimeOffset').on('value', s=>{ SERVER_OFFSET_MS = Number(s.val()||0); });
 
     sensorsRef = db.ref('sensors');
@@ -179,7 +192,6 @@
       const d=snap.val()||{};
       setText('status-value', d.running ? 'RUNNING' : 'STOPPED');
       setText('source-value', d.lastCommandSource ? String(d.lastCommandSource).toUpperCase() : '--');
-      // Optional: jika kamu menyimpan info jaringan di RTDB, isi badge di Pengaturan:
       if (d.net){ setText('net-ssid', d.net.ssid||'—'); setText('net-ip', d.net.ip||'—'); setText('net-rssi', (typeof d.net.rssi==='number')?`${d.net.rssi} dBm`:'—'); }
     });
 
@@ -227,18 +239,26 @@
   }
 
   // ===== Auth & Boot =====
-  function toggleAuth(){ $('#logout-modal').style.display='block'; }
-  function closeModal(){  $('#logout-modal').style.display='none'; }
+  function toggleAuth(){ const m=$('#logout-modal'); if(m) m.style.display='block'; }
+  function closeModal(){  const m=$('#logout-modal'); if(m) m.style.display='none'; }
   function logout(){
+    if (!hasFirebase) return;
     auth.signOut().then(()=>{ showToast('Logout Berhasil','Anda telah keluar','success'); setTimeout(()=> location.href='login.html', 900); })
                   .catch(err=> showToast('Error Logout', err.message, 'error'));
   }
 
   document.addEventListener('DOMContentLoaded', ()=>{
+    // Kunci UI dulu; loader akan di-hide oleh fallback di atas
     setUIEnabled(false);
-    setTimeout(()=> $('#loading-overlay')?.classList.add('hidden'), 900);
 
     initChart(); bindRangeButtons(); setupMobileNav();
+
+    if (!hasFirebase) {
+      showToast('Firebase tidak terdeteksi','Periksa file firebase-config.js & kredensialnya.', 'warning', 4500);
+      // Tetap tampilkan modal offline agar user paham kenapa kontrol terkunci
+      setTimeout(()=> showOfflineModal(true), 500);
+      return;
+    }
 
     auth.onAuthStateChanged(user=>{
       if(!user){ window.location.href='login.html'; return; }
@@ -246,6 +266,8 @@
       $('#auth-btn')?.classList.remove('hidden');
 
       setupRealtimeListeners(); attachLogsListener();
+      // loader sudah dipaksa hide lewat fallback; biar aman panggil lagi
+      hideLoader();
     });
 
     document.addEventListener('visibilitychange', ()=>{ if(document.hidden) stopHeartbeatWatch(); else startHeartbeatWatch(); });
@@ -269,6 +291,7 @@
     serverNow: serverNow(),
     LAST_SEEN_MS, hasHeartbeat,
     ageHeartbeatMs: serverNow()-LAST_SEEN_MS,
-    deviceOnline, clientOnline: navigator.onLine
+    deviceOnline, clientOnline: navigator.onLine,
+    hasFirebase
   });
 })();
