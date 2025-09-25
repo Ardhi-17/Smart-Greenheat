@@ -8,6 +8,12 @@
   <link rel="stylesheet" href="css/dashboard.css" />
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <noscript>
+    <style>
+      .loading-overlay{display:none!important}
+      body::before{content:"Harus mengaktifkan JavaScript untuk membuka dashboard.";display:block;background:#fff3cd;color:#664d03;padding:12px;border-bottom:1px solid #ffe69c}
+    </style>
+  </noscript>
 </head>
 <body>
   <!-- Loading Spinner -->
@@ -149,37 +155,7 @@
       </div>
 
       <div class="settings-grid">
-        <!-- Kartu: Perangkat & Lokasi (contoh singkat) -->
-        <div class="setting-card">
-          <div class="setting-card-header">
-            <i class="fas fa-microchip"></i>
-            <div>
-              <h3>Perangkat & Lokasi</h3>
-              <p class="muted">Identitas perangkat untuk memudahkan identifikasi.</p>
-            </div>
-          </div>
-          <div class="setting-card-body">
-            <div class="form-row">
-              <label for="dev-name">Nama Perangkat</label>
-              <input id="dev-name" type="text" placeholder="GreenHeat-01" disabled />
-            </div>
-            <div class="form-row two">
-              <div>
-                <label for="dev-room">Lokasi</label>
-                <input id="dev-room" type="text" placeholder="Ruang 3" disabled />
-              </div>
-              <div>
-                <label for="dev-tz">Zona Waktu</label>
-                <input id="dev-tz" type="text" placeholder="Asia/Jakarta" disabled />
-              </div>
-            </div>
-          </div>
-          <div class="setting-card-footer">
-            <button class="btn btn-secondary" type="button" disabled>Simpan</button>
-          </div>
-        </div>
-
-        <!-- Kartu: Jaringan (ada action bar di bawah) -->
+        <!-- Kartu: Jaringan (sticky actions) -->
         <div class="setting-card">
           <div class="setting-card-header">
             <i class="fas fa-wifi"></i>
@@ -212,11 +188,10 @@
             </div>
           </div>
 
-          <!-- Action bar lengket di bawah kartu -->
           <div class="setting-sticky-actions">
             <div class="left-note">
               <i class="fas fa-circle-info"></i>
-              <span>Untuk mengganti jaringan, perangkat akan masuk ke portal konfigurasi.</span>
+              <span>Untuk mengganti jaringan, perangkat akan masuk portal konfigurasi.</span>
             </div>
             <div class="right-actions">
               <button class="btn btn-outline" type="button" onclick="testConnection()">
@@ -229,13 +204,13 @@
           </div>
         </div>
 
-        <!-- Kartu: Zona Berbahaya (contoh) -->
+        <!-- Kartu contoh lain -->
         <div class="setting-card danger">
           <div class="setting-card-header">
             <i class="fas fa-triangle-exclamation"></i>
             <div>
               <h3>Zona Berbahaya</h3>
-              <p class="muted">Tindakan ini berisiko. Pastikan Anda paham konsekuensinya.</p>
+              <p class="muted">Gunakan dengan hati-hati.</p>
             </div>
           </div>
           <div class="setting-card-body">
@@ -294,7 +269,7 @@
     </div>
   </div>
 
-  <!-- Mobile Bottom Navigation (single-page anchors, bebas 404) -->
+  <!-- Mobile Bottom Navigation -->
   <nav class="mobile-nav" aria-label="Bottom navigation">
     <a href="#top" class="nav-item" data-target="#top">
       <i class="fas fa-home" aria-hidden="true"></i>
