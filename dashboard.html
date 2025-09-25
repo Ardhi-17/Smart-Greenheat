@@ -16,7 +16,7 @@
     <p>Memuat dashboard...</p>
   </div>
 
-  <div class="container">
+  <div class="container" id="top">
     <!-- Header -->
     <header class="main-header">
       <div class="header-left">
@@ -37,7 +37,8 @@
       </div>
     </header>
 
-    <!-- Stats Cards -->
+    <!-- ===== Dashboard (cards) ===== -->
+    <a id="dashboard" class="anchor"></a>
     <div class="stats-grid">
       <div class="stat-card">
         <div class="card-header">
@@ -94,8 +95,9 @@
       </div>
     </div>
 
-    <!-- Grafik Sensor -->
-    <div class="section" id="chart-section" aria-disabled="true">
+    <!-- ===== Grafik Sensor ===== -->
+    <a id="chart-section" class="anchor"></a>
+    <div class="section" aria-disabled="true">
       <div class="section-header">
         <h2><i class="fas fa-chart-line" aria-hidden="true"></i> Grafik Sensor</h2>
         <div class="range-tabs" role="tablist" aria-label="Rentang waktu grafik">
@@ -111,8 +113,9 @@
       </div>
     </div>
 
-    <!-- Control Panel -->
-    <div class="section" id="control-section" aria-disabled="true">
+    <!-- ===== Control Panel ===== -->
+    <a id="control-section" class="anchor"></a>
+    <div class="section" aria-disabled="true">
       <div class="section-header">
         <h2><i class="fas fa-bolt" aria-hidden="true"></i> Kontrol Sistem</h2>
         <div class="control-right">
@@ -136,6 +139,15 @@
           <i class="fas fa-sync-alt" aria-hidden="true"></i> REFRESH
         </button>
       </div>
+    </div>
+
+    <!-- ===== Pengaturan (placeholder agar tidak 404) ===== -->
+    <a id="settings-section" class="anchor"></a>
+    <div class="section">
+      <div class="section-header">
+        <h2><i class="fas fa-cog" aria-hidden="true"></i> Pengaturan</h2>
+      </div>
+      <p>Halaman pengaturan akan ditambahkan di versi berikutnya. Sementara ini, penggantian Wi-Fi bisa dari tombol <b>Ganti Wi-Fi</b> pada bagian Kontrol Sistem.</p>
     </div>
 
     <!-- Modal Logout -->
@@ -185,21 +197,21 @@
     </div>
   </div>
 
-  <!-- Mobile Bottom Navigation -->
-  <nav class="mobile-nav" aria-label="Bottom navigation" data-page="dashboard">
-    <a href="dashboard.html" class="nav-item">
+  <!-- Mobile Bottom Navigation (single-page anchors, bebas 404) -->
+  <nav class="mobile-nav" aria-label="Bottom navigation">
+    <a href="#top" class="nav-item" data-target="#top">
       <i class="fas fa-home" aria-hidden="true"></i>
       <span>Dashboard</span>
     </a>
-    <a href="grafik.html" class="nav-item">
+    <a href="#chart-section" class="nav-item" data-target="#chart-section">
       <i class="fas fa-chart-line" aria-hidden="true"></i>
       <span>Grafik</span>
     </a>
-    <a href="kontrol.html" class="nav-item">
+    <a href="#control-section" class="nav-item" data-target="#control-section">
       <i class="fas fa-gamepad" aria-hidden="true"></i>
       <span>Kontrol</span>
     </a>
-    <a href="pengaturan.html" class="nav-item">
+    <a href="#settings-section" class="nav-item" data-target="#settings-section">
       <i class="fas fa-cog" aria-hidden="true"></i>
       <span>Pengaturan</span>
     </a>
