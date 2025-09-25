@@ -347,15 +347,15 @@ document.addEventListener("DOMContentLoaded", function () {
       labels: ["Kondisi Percobaan"],
       datasets: [
         {
-          label: "Sebelum Pakai Smart GreenHeat",
-          data: [24],
+          label: "Sebelum Pakai Alat Smart GreenHeat",
+          data: [21],
           backgroundColor: "rgba(255, 154, 0, 0.7)",
           borderColor: "rgba(255, 154, 0, 1)",
           borderWidth: 1,
         },
         {
-          label: "Setelah Pakai Smart GreenHeat",
-          data: [12],
+          label: "Setelah Pakai Alat Smart GreenHeat",
+          data: [7],
           backgroundColor: "rgba(79, 32, 13, 0.7)",
           borderColor: "rgba(79, 32, 13, 1)",
           borderWidth: 1,
