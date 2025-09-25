@@ -30,6 +30,9 @@ body{
 }
 .container{max-width:1200px;margin:0 auto;padding:var(--spacer)}
 
+/* ===== Utilities ===== */
+.hidden{display:none !important}
+
 /* ===== Loading ===== */
 .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.9);
   display:flex;flex-direction:column;justify-content:center;align-items:center;
@@ -93,7 +96,14 @@ body{
 /* ===== Section ===== */
 .section{background:#fff;border-radius:var(--radius-lg);padding:var(--spacer-lg);margin-bottom:var(--spacer-xl);box-shadow:var(--shadow);border:1px solid var(--gray-200);position:relative;overflow:hidden}
 .section::before{content:'';position:absolute;inset:0 0 auto 0;height:5px;background:linear-gradient(90deg,var(--primary),var(--primary-dark))}
-.section.disabled{ filter: grayscale(.15) opacity(.6); pointer-events: none; transition: filter .2s ease;}
+.section.disabled{
+  filter: grayscale(.15) opacity(.65);
+  pointer-events: none;
+  user-select: none;
+  transition: filter .2s ease;
+}
+
+/* ===== Section Header & Actions ===== */
 .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--spacer-lg);flex-wrap:wrap;gap:var(--spacer)}
 .section-header h2{margin:0;font-size:1.5rem;display:flex;align-items:center;gap:.75rem}
 .control-right{display:flex;gap:.5rem;flex-wrap:wrap}
