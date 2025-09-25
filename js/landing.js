@@ -341,45 +341,80 @@ document.addEventListener('DOMContentLoaded', markNavPanel);
 document.addEventListener("DOMContentLoaded", function () {
   const ctx = document.getElementById("Provide");
 
+  // register plugin datalabels
+  Chart.register(ChartDataLabels);
+
+  const formatID = (v) => new Intl.NumberFormat("id-ID").format(v);
+
+  const datasets = [
+    {
+      label: "Sebelum Pakai Alat Smart GreenHeat",
+      data: [180],
+      backgroundColor: "rgba(255, 154, 0, 0.7)",
+      borderColor: "rgba(255, 154, 0, 1)",
+      borderWidth: 1,
+      borderRadius: 8
+    },
+    {
+      label: "Setelah Pakai Alat Smart GreenHeat",
+      data: [120],
+      backgroundColor: "rgba(79, 32, 13, 0.7)",
+      borderColor: "rgba(79, 32, 13, 1)",
+      borderWidth: 1,
+      borderRadius: 8
+    }
+  ];
+
+  // headroom agar label tidak kepotong
+  const maxVal = Math.max(...datasets.flatMap(d => d.data));
+  const suggestedMax = Math.ceil(maxVal * 1.15);
+
   new Chart(ctx, {
     type: "bar",
     data: {
       labels: ["Kondisi Percobaan Pengeringan per (25Ton)"],
-      datasets: [
-        {
-          label: "Sebelum Pakai Alat Smart GreenHeat",
-          data: [180],
-          backgroundColor: "rgba(255, 154, 0, 0.7)",
-          borderColor: "rgba(255, 154, 0, 1)",
-          borderWidth: 1,
-        },
-        {
-          label: "Setelah Pakai Alat Smart GreenHeat",
-          data: [120],
-          backgroundColor: "rgba(79, 32, 13, 0.7)",
-          borderColor: "rgba(79, 32, 13, 1)",
-          borderWidth: 1,
-        },
-      ],
+      datasets
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true, // ✅ Supaya responsif
+      maintainAspectRatio: false,              // biar benar-benar responsif
+      layout: { padding: { top: 24, right: 8 } },
       plugins: {
-        legend: {
-          position: "top",
-          labels: { boxWidth: 20 },
+        legend: { position: "top", labels: { boxWidth: 20 } },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.dataset.label}: ${formatID(ctx.raw)} Hari`
+          }
         },
+        datalabels: {
+          anchor: 'end',            // posisi relatif ke batang
+          align: 'top',             // taruh di atas
+          offset: 4,
+          clamp: true,              // cegah keluar canvas
+          color: '#4F200D',
+          font: { weight: '600', size: 12 },
+          formatter: (v) => `${formatID(v)} Hari`
+        }
       },
       scales: {
+        x: {
+          grid: { display: true, drawOnChartArea: true }
+        },
         y: {
           beginAtZero: true,
+          suggestedMax,
           title: { display: true, text: "Hari" },
-          ticks: { stepSize: 5 },
-        },
+          ticks: {
+            stepSize: 5,
+            callback: (v) => `${formatID(v)}`
+          }
+        }
       },
-    },
+      // kontrol lebar batang
+      categoryPercentage: 0.6,
+      barPercentage: 0.8,
+      animation: { duration: 800, easing: 'easeOutQuart' }
+    }
   });
 });
-
 
