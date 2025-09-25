@@ -103,3 +103,23 @@ function showLoading() {
     });
   });
   
+  // ====== eye ====== //
+ const pwdInput  = document.getElementById('password');
+const togglePwd = document.getElementById('toggle-password');
+
+if (togglePwd && pwdInput) {
+  togglePwd.addEventListener('click', () => {
+    const nowHidden = pwdInput.type === 'password';
+    pwdInput.type = nowHidden ? 'text' : 'password';
+
+    togglePwd.setAttribute('aria-pressed', String(nowHidden));
+    togglePwd.setAttribute('aria-label', nowHidden ? 'Sembunyikan password' : 'Tampilkan password');
+    togglePwd.title = nowHidden ? 'Sembunyikan password' : 'Tampilkan password';
+
+    const icon = togglePwd.querySelector('i');
+    if (icon) {
+      icon.classList.toggle('fa-eye', !nowHidden);
+      icon.classList.toggle('fa-eye-slash', nowHidden);
+    }
+  });
+}

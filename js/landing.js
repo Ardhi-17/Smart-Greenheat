@@ -344,18 +344,18 @@ document.addEventListener("DOMContentLoaded", function () {
   new Chart(ctx, {
     type: "bar",
     data: {
-      labels: ["Kondisi Percobaan"],
+      labels: ["Kondisi Percobaan Pengeringan per (25Ton)"],
       datasets: [
         {
           label: "Sebelum Pakai Alat Smart GreenHeat",
-          data: [21],
+          data: [180],
           backgroundColor: "rgba(255, 154, 0, 0.7)",
           borderColor: "rgba(255, 154, 0, 1)",
           borderWidth: 1,
         },
         {
           label: "Setelah Pakai Alat Smart GreenHeat",
-          data: [7],
+          data: [120],
           backgroundColor: "rgba(79, 32, 13, 0.7)",
           borderColor: "rgba(79, 32, 13, 1)",
           borderWidth: 1,
@@ -364,7 +364,7 @@ document.addEventListener("DOMContentLoaded", function () {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false, // ✅ Supaya responsif
+      maintainAspectRatio: true, // ✅ Supaya responsif
       plugins: {
         legend: {
           position: "top",
