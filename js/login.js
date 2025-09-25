@@ -93,11 +93,20 @@ function showLoading() {
   
           // Pesan error yang lebih ramah
           let msg = error.message;
-          if (error.code === 'auth/invalid-email') msg = 'Format email tidak valid.';
-          if (error.code === 'auth/user-not-found') msg = 'Akun tidak ditemukan.';
-          if (error.code === 'auth/wrong-password') msg = 'Password salah.';
-          if (error.code === 'auth/too-many-requests')
-            msg = 'Terlalu banyak percobaan. Coba lagi nanti.';
+
+      if (error.code === 'auth/invalid-email')              msg = 'Format email tidak valid.';
+      if (error.code === 'auth/missing-email')              msg = 'Email wajib diisi.';
+      if (error.code === 'auth/missing-password')           msg = 'Password wajib diisi.';
+      if (error.code === 'auth/user-not-found')             msg = 'Akun tidak ditemukan.';   // email belum terdaftar
+      if (error.code === 'auth/wrong-password')             msg = 'Password salah.';
+      if (error.code === 'auth/invalid-credential'
+       || error.code === 'auth/invalid-login-credentials')  msg = 'Email belum terdaftar atau password salah.'; // kasus gabungan
+      if (error.code === 'auth/user-disabled')              msg = 'Akun ini telah dinonaktifkan.';
+      if (error.code === 'auth/too-many-requests')          msg = 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi atau reset sandi.';
+      if (error.code === 'auth/network-request-failed')     msg = 'Gagal terhubung. Periksa koneksi internet Anda.';
+
+      // bersihin prefix "Firebase: " & kode di dalam kurung jika masih ada
+      msg = msg.replace(/^Firebase:\s*/i, '').replace(/\s*\(.*\)$/, '');
           showToast(msg, 'error');
         });
     });
