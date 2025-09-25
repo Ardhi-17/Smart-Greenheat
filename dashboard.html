@@ -8,12 +8,6 @@
   <link rel="stylesheet" href="css/dashboard.css" />
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <noscript>
-    <style>
-      .loading-overlay{display:none!important}
-      body::before{content:"Harus mengaktifkan JavaScript untuk membuka dashboard.";display:block;background:#fff3cd;color:#664d03;padding:12px;border-bottom:1px solid #ffe69c}
-    </style>
-  </noscript>
 </head>
 <body>
   <!-- Loading Spinner -->
@@ -147,79 +141,13 @@
       </div>
     </div>
 
-    <!-- ===== Pengaturan ===== -->
+    <!-- ===== Pengaturan (placeholder agar tidak 404) ===== -->
     <a id="settings-section" class="anchor"></a>
-    <div class="section settings-section">
+    <div class="section">
       <div class="section-header">
         <h2><i class="fas fa-cog" aria-hidden="true"></i> Pengaturan</h2>
       </div>
-
-      <div class="settings-grid">
-        <!-- Kartu: Jaringan (sticky actions) -->
-        <div class="setting-card">
-          <div class="setting-card-header">
-            <i class="fas fa-wifi"></i>
-            <div>
-              <h3>Jaringan</h3>
-              <p class="muted">Status koneksi & tindakan konfigurasi Wi-Fi.</p>
-            </div>
-          </div>
-
-          <div class="setting-card-body">
-            <div class="form-row two">
-              <div>
-                <label>SSID Aktif</label>
-                <div id="net-ssid" class="pill">—</div>
-              </div>
-              <div>
-                <label>Kekuatan Sinyal</label>
-                <div id="net-rssi" class="pill">—</div>
-              </div>
-            </div>
-            <div class="form-row two">
-              <div>
-                <label>Alamat IP</label>
-                <div id="net-ip" class="pill">—</div>
-              </div>
-              <div>
-                <label>Status</label>
-                <div id="net-status" class="pill">OFFLINE</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="setting-sticky-actions">
-            <div class="left-note">
-              <i class="fas fa-circle-info"></i>
-              <span>Untuk mengganti jaringan, perangkat akan masuk portal konfigurasi.</span>
-            </div>
-            <div class="right-actions">
-              <button class="btn btn-outline" type="button" onclick="testConnection()">
-                <i class="fas fa-plug-circle-bolt"></i> Uji Koneksi
-              </button>
-              <button class="btn btn-primary" type="button" onclick="wifiReconfig()">
-                <i class="fas fa-wifi"></i> Ganti Wi-Fi
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Kartu contoh lain -->
-        <div class="setting-card danger">
-          <div class="setting-card-header">
-            <i class="fas fa-triangle-exclamation"></i>
-            <div>
-              <h3>Zona Berbahaya</h3>
-              <p class="muted">Gunakan dengan hati-hati.</p>
-            </div>
-          </div>
-          <div class="setting-card-body">
-            <button class="btn btn-danger" type="button" onclick="confirmFactoryReset()">
-              <i class="fas fa-bomb"></i> Reset ke Default
-            </button>
-          </div>
-        </div>
-      </div>
+      <p>Halaman pengaturan akan ditambahkan di versi berikutnya. Sementara ini, penggantian Wi-Fi bisa dari tombol <b>Ganti Wi-Fi</b> pada bagian Kontrol Sistem.</p>
     </div>
 
     <!-- Modal Logout -->
@@ -269,7 +197,7 @@
     </div>
   </div>
 
-  <!-- Mobile Bottom Navigation -->
+  <!-- Mobile Bottom Navigation (single-page anchors, bebas 404) -->
   <nav class="mobile-nav" aria-label="Bottom navigation">
     <a href="#top" class="nav-item" data-target="#top">
       <i class="fas fa-home" aria-hidden="true"></i>
