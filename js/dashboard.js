@@ -78,16 +78,16 @@
   function setUIEnabled(isOnline) {
     // kunci semua section
     document.querySelectorAll('.section').forEach(sec=>{
-      // sec.classList.toggle('disabled', !isOnline);
+      sec.classList.toggle('disabled', !isOnline);
       sec.setAttribute('aria-disabled', String(!isOnline));
     });
     // tombol (kecuali tombol di dalam modal offline dan tombol logout-modal)
-    // document.querySelectorAll('button').forEach(b=>{
-    //   const keep = b.closest('#device-offline-modal, #logout-modal');
-    //   b.disabled = !isOnline && !keep;
-    // });
-    // // range tabs
-    // $$('.range-btn').forEach(b=> b.disabled = !isOnline);
+    document.querySelectorAll('button').forEach(b=>{
+      const keep = b.closest('#device-offline-modal, #logout-modal');
+      b.disabled = !isOnline && !keep;
+    });
+    // range tabs
+    $$('.range-btn').forEach(b=> b.disabled = !isOnline);
   }
 
   function showOfflineModal(show){

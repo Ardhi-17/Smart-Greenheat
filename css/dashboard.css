@@ -116,7 +116,7 @@ body{
   transition:transform .18s, box-shadow .18s, filter .18s;
   padding: 10px 20px;
 }
-/* .control-btn:disabled{opacity:.6;cursor:not-allowed;filter:saturate(.75)} */
+.control-btn:disabled{opacity:.6;cursor:not-allowed;filter:saturate(.75)}
 .btn-success{background-image:linear-gradient(135deg,var(--start-1),var(--start-2));color:#1a1a1a}
 .btn-danger{background-image:linear-gradient(135deg,var(--stop-1),var(--stop-2));color:#fff}
 .btn-info{background-image:linear-gradient(135deg,var(--ref-1),var(--ref-2));color:#fff}
