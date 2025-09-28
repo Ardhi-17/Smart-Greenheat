@@ -76,19 +76,23 @@
 
   // ===== Online/Offline UI =====
   function setUIEnabled(isOnline) {
-    // kunci semua section
-    document.querySelectorAll('.section').forEach(sec=>{
-      sec.classList.toggle('disabled', !isOnline);
-      sec.setAttribute('aria-disabled', String(!isOnline));
-    });
-    // tombol (kecuali tombol di dalam modal offline dan tombol logout-modal)
-    document.querySelectorAll('button').forEach(b=>{
-      const keep = b.closest('#device-offline-modal, #logout-modal');
-      b.disabled = !isOnline && !keep;
-    });
-    // range tabs
-    $$('.range-btn').forEach(b=> b.disabled = !isOnline);
-  }
+  // lock/unlock sections
+  document.querySelectorAll('.section').forEach(sec => {
+    sec.classList.toggle('disabled', !isOnline);
+    sec.setAttribute('aria-disabled', String(!isOnline));
+  });
+
+  // Buttons: keep modal buttons & the header Logout button always enabled
+  const AUTH_BTN_ID = 'auth-btn';
+  document.querySelectorAll('button').forEach(b => {
+    const keepModalBtn = b.closest('#device-offline-modal, #logout-modal');
+    const keepAuthBtn  = (b.id === AUTH_BTN_ID) || b.classList.contains('auth-button');
+    b.disabled = !isOnline && !keepModalBtn && !keepAuthBtn;
+  });
+
+  // Range tabs
+  document.querySelectorAll('.range-btn').forEach(b => b.disabled = !isOnline);
+}
 
   function showOfflineModal(show){
     const m = document.getElementById('device-offline-modal');

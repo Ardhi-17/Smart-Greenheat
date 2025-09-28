@@ -201,6 +201,18 @@
 .input-with-icon input {
   padding-right: 2.75rem; /* ruang buat tombol mata */
 }
+.input-error{
+  outline:2px solid #e03131;
+  box-shadow:0 0 0 3px rgba(224,49,49,.15) inset;
+  animation:shake .25s ease-in-out;
+}
+@keyframes shake{
+  10%,90%{transform:translateX(-2px)}
+  20%,80%{transform:translateX(4px)}
+  30%,50%,70%{transform:translateX(-6px)}
+  40%,60%{transform:translateX(6px)}
+}
+
 
 .toggle-password {
   position: absolute;
