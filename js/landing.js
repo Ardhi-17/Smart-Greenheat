@@ -276,22 +276,4 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-/* -----------------------
-   Maps fallback handler
-   ----------------------- */
-// NOTE: pastikan di HTML iframe maps pakai id="gmap" dan ada <div id="gmap-fallback" hidden>
-(function(){
-  const iframe   = document.getElementById('gmap');
-  const fallback = document.getElementById('gmap-fallback');
-  if (!iframe || !fallback) return;
 
-  let loaded = false;
-  const TIMEOUT_MS = 8000; // jika 8 detik belum 'load', tampilkan fallback
-
-  iframe.addEventListener('load', () => {
-    loaded = true;
-    fallback.hidden = true;
-  });
-
-  setTimeout(() => { if (!loaded) fallback.hidden = false; }, TIMEOUT_MS);
-})();
